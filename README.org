@@ -1,4 +1,4 @@
-## Time-stamp: <2013-05-16 19:05:51 vk>
+## Time-stamp: <2013-05-17 11:08:48 vk>
 ## -*- coding: utf-8 -*-
 ## This file is best viewed with GNU Emacs Org-mode: http://orgmode.org/
 
@@ -83,7 +83,7 @@ script does provide a shell window for entering the tags.
 : #!/bin/sh
 : 
 : /usr/bin/gnome-terminal \
-:     --geometry=157x56+330+5  \
+:     --geometry=90x5+330+5  \
 :     --tab-with-profile=big \
 :     --hide-menubar \
 :     -x /home/vk/src/appendfilename/appendfilename.py "${@}"
