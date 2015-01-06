@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Time-stamp: <2013-05-21 12:01:01 vk>
+# Time-stamp: <2015-01-06 15:21:14 vk>
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
-
-
 
 ## ===================================================================== ##
 ##  You might not want to modify anything below this line if you do not  ##
@@ -20,16 +18,14 @@ import os
 import time
 import logging
 from optparse import OptionParser
+import readline  # for raw_input() reading from stdin
 
-## debugging:   for setting a breakpoint:  pdb.set_trace()
-import pdb
-
-PROG_VERSION_NUMBER = u"0.1"
-PROG_VERSION_DATE = u"2013-05-16"
+PROG_VERSION_NUMBER = u"0.2"
+PROG_VERSION_DATE = u"2015-01-06"
 INVOCATION_TIME = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
-FILENAME_TAG_SEPARATOR = u' -- ' ## between file name and (optional) list of tags
-BETWEEN_TAG_SEPARATOR = u' '  ## between tags (not that relevant in this tool)
-TEXT_SEPARATOR = u' '  ## between old file name and inserted text
+FILENAME_TAG_SEPARATOR = u' -- '  # between file name and (optional) list of tags
+BETWEEN_TAG_SEPARATOR = u' '  # between tags (not that relevant in this tool)
+TEXT_SEPARATOR = u' '  # between old file name and inserted text
 
 USAGE = u"\n\
     " + sys.argv[0] + u" [<options>] <list of files>\n\
@@ -66,7 +62,8 @@ FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX = 2
 
 #1 TEXT#2
 
-
+FILENAME_COMPONENT_REGEX = re.compile("[a-zA-Z]+")
+FILENAME_COMPONENT_LOWERCASE_BLACKLIST = ['img', 'jpg', 'jpeg', 'png', 'bmp']
 
 parser = OptionParser(usage=USAGE)
 
@@ -74,7 +71,7 @@ parser.add_option("-t", "--text", dest="text",
                   help="the text to add to the file name")
 
 parser.add_option("-s", "--dryrun", dest="dryrun", action="store_true",
-        help="enable dryrun mode: just simulate what would happen, do not modify file(s)")
+                  help="enable dryrun mode: just simulate what would happen, do not modify file(s)")
 
 parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
                   help="enable verbose mode")
@@ -109,6 +106,65 @@ def error_exit(errorcode, text):
     logging.error(text)
 
     sys.exit(errorcode)
+
+
+class SimpleCompleter(object):
+    ## happily stolen from http://pymotw.com/2/readline/
+
+    def __init__(self, options):
+        self.options = sorted(options)
+        return
+
+    def complete(self, text, state):
+        response = None
+        if state == 0:
+            # This is the first time for this text, so build a match list.
+            if text:
+                self.matches = [s
+                                for s in self.options
+                                if s and s.startswith(text)]
+                logging.debug('%s matches: %s', repr(text), self.matches)
+            else:
+                self.matches = self.options[:]
+                logging.debug('(empty input) matches: %s', self.matches)
+
+        # Return the state'th item from the match list,
+        # if we have that many.
+        try:
+            response = self.matches[state]
+        except IndexError:
+            response = None
+        logging.debug('complete(%s, %s) => %s',
+                      repr(text), state, repr(response))
+        return response
+
+
+def locate_and_parse_controlled_vocabulary():
+    """This method is looking for filenames in the current directory
+    and parses them. This results in a list of words which are used for tab completion.
+
+    @param return: either False or a list of found words (strings)
+
+    """
+
+    cv = []
+    files = [f for f in os.listdir('.') if os.path.isfile(f)]
+    for f in files:
+        ## extract all words from the file name that don't contain numbers
+        new_items = FILENAME_COMPONENT_REGEX.findall(os.path.splitext(os.path.basename(f))[0])
+        ## remove words that are too small
+        new_items = [item for item in new_items if len(item) > 1]
+        ## remove words that are listed in the blacklist
+        new_items = [item for item in new_items if item.lower() not in FILENAME_COMPONENT_LOWERCASE_BLACKLIST]
+        ## remove words that are already in the controlled vocabulary
+        new_items = [item for item in new_items if item not in cv]
+        ## append newly found words to the controlled vocabulary
+        cv.extend(new_items)
+
+    if len(cv) > 0:
+        return cv
+    else:
+        return False
 
 
 def handle_file(filename, text, dryrun):
@@ -163,16 +219,35 @@ def main():
         logging.debug("interactive mode: asking for text ...")
         logging.info("Interactive mode: add text to file name ...")
 
-        print "Please enter text:               (abort with Ctrl-C)"
-        text = sys.stdin.readline().strip()
+        vocabulary = locate_and_parse_controlled_vocabulary()
+        if vocabulary:
+
+            assert(vocabulary.__class__ == list)
+
+            # Register our completer function
+            readline.set_completer(SimpleCompleter(vocabulary).complete)
+
+            # Use the tab key for completion
+            readline.parse_and_bind('tab: complete')
+
+            tabcompletiondescription = '; complete ' + str(len(vocabulary)) + ' words with TAB'
+
+        print '         (abort with Ctrl-C' + tabcompletiondescription + ')'
+        print
+        text = raw_input('Please enter text: ').strip()
+
+        if not text or len(text) < 1:
+            logging.info("no text given, exiting.")
+            sys.stdout.flush()
+            sys.exit(0)
 
         logging.info("adding text \"%s\" ..." % text)
-            
+
     logging.debug("text found: [%s]" % text)
 
     logging.debug("extracting list of files ...")
     logging.debug("len(args) [%s]" % str(len(args)))
-    if len(args)<1:
+    if len(args) < 1:
         error_exit(2, "Please add at least one file name as argument")
     files = args
     logging.debug("%s filenames found: [%s]" % (str(len(files)), '], ['.join(files)))
