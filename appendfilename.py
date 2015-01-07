@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Time-stamp: <2015-01-07 20:39:42 vk>
+# Time-stamp: <2015-01-07 20:57:50 vk>
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
@@ -56,8 +56,8 @@ Example usages:\n\
 
 
 ## file names containing optional tags matches following regular expression
-FILE_WITH_EXTENSION_REGEX = re.compile("(.*?)(( -- .*)?\.\w+?)$")
-FILE_WITH_EXTENSION_FILENAME_INDEX = 1
+FILE_WITH_EXTENSION_REGEX = re.compile("(.*?)(( -- .*)?(\.\w+?)?)$")
+FILE_WITH_EXTENSION_BASENAME_INDEX = 1
 FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX = 2
 
 #1 TEXT#2
@@ -191,10 +191,14 @@ def handle_file(filename, text, dryrun):
         return
 
     components = re.match(FILE_WITH_EXTENSION_REGEX, filename)
-    old_filename = components.group(FILE_WITH_EXTENSION_FILENAME_INDEX)
-    tags_with_extension = components.group(FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX)
+    if components:
+        old_basename = components.group(FILE_WITH_EXTENSION_BASENAME_INDEX)
+        tags_with_extension = components.group(FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX)
+    else:
+        logging.error('Could not extract file name components of \"%s\". Please do report.' % str(filename))
+        return
 
-    new_filename = old_filename + TEXT_SEPARATOR + text + tags_with_extension
+    new_filename = old_basename + TEXT_SEPARATOR + text + tags_with_extension
 
     if dryrun:
         logging.info(u" ")
