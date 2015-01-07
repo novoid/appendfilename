@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Time-stamp: <2015-01-06 15:21:14 vk>
+# Time-stamp: <2015-01-07 20:39:42 vk>
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
@@ -62,8 +62,16 @@ FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX = 2
 
 #1 TEXT#2
 
+## RegEx which defines "what is a file name component" for tab completion:
 FILENAME_COMPONENT_REGEX = re.compile("[a-zA-Z]+")
-FILENAME_COMPONENT_LOWERCASE_BLACKLIST = ['img', 'jpg', 'jpeg', 'png', 'bmp']
+
+## blacklist of lowercase strings that are being ignored for tab completion
+FILENAME_COMPONENT_LOWERCASE_BLACKLIST = ['img', 'eine', 'einem', 'eines', 'fuer', 'haben',
+                                          'machen', 'macht', 'mein', 'meine', 'meinem',
+                                          'meinen', 'meines', 'neuem', 'neuer', 'neuen', 'vkvlc']
+
+## initial CV with strings that are provided for tab completion in any case (whitelist)
+INITIAL_CONTROLLED_VOCABULARY = ['Karl', 'Graz', 'LaTeX', 'specialL', 'specialP']
 
 parser = OptionParser(usage=USAGE)
 
@@ -147,13 +155,13 @@ def locate_and_parse_controlled_vocabulary():
 
     """
 
-    cv = []
+    cv = INITIAL_CONTROLLED_VOCABULARY
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     for f in files:
         ## extract all words from the file name that don't contain numbers
         new_items = FILENAME_COMPONENT_REGEX.findall(os.path.splitext(os.path.basename(f))[0])
         ## remove words that are too small
-        new_items = [item for item in new_items if len(item) > 1]
+        new_items = [item for item in new_items if len(item) > 3]
         ## remove words that are listed in the blacklist
         new_items = [item for item in new_items if item.lower() not in FILENAME_COMPONENT_LOWERCASE_BLACKLIST]
         ## remove words that are already in the controlled vocabulary
