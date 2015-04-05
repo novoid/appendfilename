@@ -204,7 +204,11 @@ def handle_file(origfilename, text, dryrun):
         logging.error('Could not extract file name components of \"%s\". Please do report.' % str(filename))
         return
 
-    new_filename = old_basename + TEXT_SEPARATOR + text + tags_with_extension
+    try:
+        new_filename = old_basename + TEXT_SEPARATOR + text + tags_with_extension
+    except:
+        error_exit(7, "Error while trying to build new filename: " + str(sys.exc_info()[0]))
+    assert(isinstance(new_filename, unicode))
 
     if dryrun:
         logging.info(u" ")
