@@ -20,8 +20,8 @@ import logging
 from optparse import OptionParser
 import readline  # for raw_input() reading from stdin
 
-PROG_VERSION_NUMBER = u"0.2"
-PROG_VERSION_DATE = u"2015-01-06"
+PROG_VERSION_NUMBER = u"0.3"
+PROG_VERSION_DATE = u"2015-04-05"
 INVOCATION_TIME = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 FILENAME_TAG_SEPARATOR = u' -- '  # between file name and (optional) list of tags
 BETWEEN_TAG_SEPARATOR = u' '  # between tags (not that relevant in this tool)
@@ -48,7 +48,7 @@ Example usages:\n\
           \"2013-05-09T16.17_img_00042" + TEXT_SEPARATOR + "Peter -- fun.jpeg\"\n\
 \n\
 \n\
-:copyright: (c) 2013 by Karl Voit <tools@Karl-Voit.at>\n\
+:copyright: (c) 2013 or later by Karl Voit <tools@Karl-Voit.at>\n\
 :license: GPL v3 or any later version\n\
 :URL: https://github.com/novoid/filetag\n\
 :bugreports: via github or <tools@Karl-Voit.at>\n\
@@ -60,7 +60,7 @@ FILE_WITH_EXTENSION_REGEX = re.compile("(.*?)(( -- .*)?(\.\w+?)?)$")
 FILE_WITH_EXTENSION_BASENAME_INDEX = 1
 FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX = 2
 
-#1 TEXT#2
+
 
 ## RegEx which defines "what is a file name component" for tab completion:
 FILENAME_COMPONENT_REGEX = re.compile("[a-zA-Z]+")
