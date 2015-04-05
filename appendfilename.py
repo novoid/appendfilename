@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Time-stamp: <2015-01-07 20:57:50 vk>
+# Time-stamp: <2015-04-05 14:20:45 vk>
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
@@ -112,7 +112,7 @@ def error_exit(errorcode, text):
 
     sys.stdout.flush()
     logging.error(text)
-
+    raw_input('Press <Enter> to finish with return value %i ...' % errorcode).strip()
     sys.exit(errorcode)
 
 
@@ -175,13 +175,19 @@ def locate_and_parse_controlled_vocabulary():
         return False
 
 
-def handle_file(filename, text, dryrun):
+def handle_file(origfilename, text, dryrun):
     """
-    @param filename: one file name
+    @param origfilename: one file name
     @param text: string that shall be added to file name(s)
     @param dryrun: boolean which defines if files should be changed (False) or not (True)
     @param return: error value
     """
+
+    try:
+        filename = unicode(origfilename, "UTF-8")
+    except:
+        print sys.exc_info()[0]
+    assert(isinstance(filename, unicode))
 
     if os.path.isdir(filename):
         logging.warning("Skipping directory \"%s\" because this tool only processes file names." % filename)
@@ -207,7 +213,10 @@ def handle_file(filename, text, dryrun):
     else:
         logging.debug(u" renaming \"%s\"" % filename)
         logging.debug(u"      ⤷   \"%s\"" % (new_filename))
-        os.rename(filename, new_filename)
+        try:
+            os.rename(filename, new_filename)
+        except:
+            error_exit(9, "Error while trying to rename file: " + str(sys.exc_info()[0]))
 
 
 def main():
@@ -229,7 +238,7 @@ def main():
     if not text:
 
         logging.debug("interactive mode: asking for text ...")
-        logging.info("Interactive mode: add text to file name ...")
+        logging.info("Add text to file name ...")
 
         vocabulary = locate_and_parse_controlled_vocabulary()
         if vocabulary:
@@ -246,7 +255,7 @@ def main():
 
         print '         (abort with Ctrl-C' + tabcompletiondescription + ')'
         print
-        text = raw_input('Please enter text: ').strip()
+        text = unicode(raw_input('Please enter text: ').strip(), "UTF-8")
 
         if not text or len(text) < 1:
             logging.info("no text given, exiting.")
@@ -269,6 +278,8 @@ def main():
         handle_file(filename, text, options.dryrun)
 
     logging.debug("successfully finished.")
+    if options.verbose:
+        raw_input('Please press <Enter> for finishing...').strip()
 
 
 if __name__ == "__main__":
