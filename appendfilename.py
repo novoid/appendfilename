@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Time-stamp: <2015-04-05 14:20:45 vk>
+# Time-stamp: <2015-05-30 15:49:15 vk>
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
@@ -196,7 +196,7 @@ def handle_file(origfilename, text, dryrun):
         logging.error("Skipping \"%s\" because this tool only processes existing file names." % filename)
         return
 
-    components = re.match(FILE_WITH_EXTENSION_REGEX, filename)
+    components = re.match(FILE_WITH_EXTENSION_REGEX, os.path.basename(filename))
     if components:
         old_basename = components.group(FILE_WITH_EXTENSION_BASENAME_INDEX)
         tags_with_extension = components.group(FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX)
@@ -205,7 +205,7 @@ def handle_file(origfilename, text, dryrun):
         return
 
     try:
-        new_filename = old_basename + TEXT_SEPARATOR + text + tags_with_extension
+        new_filename = os.path.join(os.path.dirname(filename), old_basename + TEXT_SEPARATOR + text + tags_with_extension)
     except:
         error_exit(7, "Error while trying to build new filename: " + str(sys.exc_info()[0]))
     assert(isinstance(new_filename, unicode))
@@ -220,7 +220,7 @@ def handle_file(origfilename, text, dryrun):
         try:
             os.rename(filename, new_filename)
         except:
-            error_exit(9, "Error while trying to rename file: " + str(sys.exc_info()[0]))
+            error_exit(9, "Error while trying to rename file: " + str(sys.exc_info()))
 
 
 def main():
