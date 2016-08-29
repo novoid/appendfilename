@@ -1,4 +1,4 @@
-## Time-stamp: <2015-01-06 15:24:10 vk>
+## Time-stamp: <2016-08-29 18:11:07 karl.voit>
 ## -*- coding: utf-8 -*-
 ## This file is best viewed with GNU Emacs Org-mode: http://orgmode.org/
 
@@ -69,7 +69,7 @@ For a complete list of parameters, please try:
 : appendfilename.py --help
 
 The file names within the current working directory is read in and all
-found words can be completed via TAB. 
+found words can be completed via TAB.
 
 ** Bonus: integrating into Geeqie (or similar file browsers)
 
@@ -84,13 +84,13 @@ script does provide a shell window for entering the tags.
 
 ~vk-appendfilename-interactive-wrapper-with-gnome-terminal.sh~ looks like:
 : #!/bin/sh
-: 
+:
 : /usr/bin/gnome-terminal \
 :     --geometry=90x5+330+5  \
 :     --tab-with-profile=big \
 :     --hide-menubar \
 :     -x /home/vk/src/appendfilename/appendfilename.py "${@}"
-: 
+:
 : #end
 
 In ~$HOME/.config/geeqie/applications~ I wrote a desktop file such
@@ -146,13 +146,17 @@ current season]].
 Files containing an ISO time/date-stamp gets indexed by the
 filename-module of [[https://github.com/novoid/Memacs][Memacs]].
 
-* Contribute!
 
-I am looking for your ideas!
+* How to Thank Me
 
-If you want to contribute to this cool project, please fork and
-contribute!
+I'm glad you like my tools. If you want to support me:
 
+- Send old-fashioned *postcard* per snailmail - I love personal feedback!
+  - see [[http://tinyurl.com/j6w8hyo][my address]]
+- Send feature wishes or improvements as an issue on GitHub
+- Create issues on GitHub for bugs
+- Contribute merge requests for bug fixes
+- Check out my other cool [[https://github.com/novoid][projects on GitHub]]
 
 * Local Variables                                                  :noexport:
 # Local Variables:
