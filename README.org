@@ -1,4 +1,4 @@
-## Time-stamp: <2016-08-29 18:11:07 karl.voit>
+## Time-stamp: <2016-09-11 17:43:41 vk>
 ## -*- coding: utf-8 -*-
 ## This file is best viewed with GNU Emacs Org-mode: http://orgmode.org/
 
@@ -70,6 +70,10 @@ For a complete list of parameters, please try:
 
 The file names within the current working directory is read in and all
 found words can be completed via TAB.
+
+** Installation
+
+Get it from [[https://github.com/novoid/appendfilename][GitHub]] or install it via «pip install appendfilename».
 
 ** Bonus: integrating into Geeqie (or similar file browsers)
 
