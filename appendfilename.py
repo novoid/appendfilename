@@ -1,6 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2015-05-30 15:49:15 vk>
+
+# Time-stamp: <2017-08-22 13:12:11 vk>
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
@@ -20,15 +21,15 @@ import logging
 from optparse import OptionParser
 import readline  # for raw_input() reading from stdin
 
-PROG_VERSION_NUMBER = u"0.3"
-PROG_VERSION_DATE = u"2015-04-05"
+PROG_VERSION_NUMBER = "0.3"
+PROG_VERSION_DATE = "2015-04-05"
 INVOCATION_TIME = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
-FILENAME_TAG_SEPARATOR = u' -- '  # between file name and (optional) list of tags
-BETWEEN_TAG_SEPARATOR = u' '  # between tags (not that relevant in this tool)
-TEXT_SEPARATOR = u' '  # between old file name and inserted text
+FILENAME_TAG_SEPARATOR = ' -- '  # between file name and (optional) list of tags
+BETWEEN_TAG_SEPARATOR = ' '  # between tags (not that relevant in this tool)
+TEXT_SEPARATOR = ' '  # between old file name and inserted text
 
-USAGE = u"\n\
-    " + sys.argv[0] + u" [<options>] <list of files>\n\
+USAGE = "\n\
+    " + sys.argv[0] + " [<options>] <list of files>\n\
 \n\
 This tool inserts text between the old file name and optional tags or file extension.\n\
 \n\
@@ -41,9 +42,9 @@ a set of tags separated with \"" + FILENAME_TAG_SEPARATOR + "\".\n\
     + FILENAME_TAG_SEPARATOR + "screenshot" + BETWEEN_TAG_SEPARATOR + "projectB.png\n\
 \n\
 Example usages:\n\
-  " + sys.argv[0] + u" --text=\"of projectA\" \"the presentation.pptx\"\n\
+  " + sys.argv[0] + " --text=\"of projectA\" \"the presentation.pptx\"\n\
       ... results in \"the presentation" + TEXT_SEPARATOR + "of projectA.pptx\"\n\
-  " + sys.argv[0] + u" \"2013-05-09T16.17_img_00042 -- fun.jpeg\"\n\
+  " + sys.argv[0] + " \"2013-05-09T16.17_img_00042 -- fun.jpeg\"\n\
       ... with interactive input of \"Peter\" results in:\n\
           \"2013-05-09T16.17_img_00042" + TEXT_SEPARATOR + "Peter -- fun.jpeg\"\n\
 \n\
@@ -112,7 +113,7 @@ def error_exit(errorcode, text):
 
     sys.stdout.flush()
     logging.error(text)
-    raw_input('Press <Enter> to finish with return value %i ...' % errorcode).strip()
+    input('Press <Enter> to finish with return value %i ...' % errorcode).strip()
     sys.exit(errorcode)
 
 
@@ -175,19 +176,15 @@ def locate_and_parse_controlled_vocabulary():
         return False
 
 
-def handle_file(origfilename, text, dryrun):
+def handle_file(filename, text, dryrun):
     """
-    @param origfilename: one file name
+    @param filename: one file name
     @param text: string that shall be added to file name(s)
     @param dryrun: boolean which defines if files should be changed (False) or not (True)
     @param return: error value
     """
 
-    try:
-        filename = unicode(origfilename, "UTF-8")
-    except:
-        print sys.exc_info()[0]
-    assert(isinstance(filename, unicode))
+    assert(isinstance(filename, str))
 
     if os.path.isdir(filename):
         logging.warning("Skipping directory \"%s\" because this tool only processes file names." % filename)
@@ -208,15 +205,15 @@ def handle_file(origfilename, text, dryrun):
         new_filename = os.path.join(os.path.dirname(filename), old_basename + TEXT_SEPARATOR + text + tags_with_extension)
     except:
         error_exit(7, "Error while trying to build new filename: " + str(sys.exc_info()[0]))
-    assert(isinstance(new_filename, unicode))
+    assert(isinstance(new_filename, str))
 
     if dryrun:
-        logging.info(u" ")
-        logging.info(u" renaming \"%s\"" % filename)
-        logging.info(u"      ⤷   \"%s\"" % (new_filename))
+        logging.info(" ")
+        logging.info(" renaming \"%s\"" % filename)
+        logging.info("      ⤷   \"%s\"" % (new_filename))
     else:
-        logging.debug(u" renaming \"%s\"" % filename)
-        logging.debug(u"      ⤷   \"%s\"" % (new_filename))
+        logging.debug(" renaming \"%s\"" % filename)
+        logging.debug("      ⤷   \"%s\"" % (new_filename))
         try:
             os.rename(filename, new_filename)
         except:
@@ -227,8 +224,8 @@ def main():
     """Main function"""
 
     if options.version:
-        print os.path.basename(sys.argv[0]) + " version " + PROG_VERSION_NUMBER + \
-            " from " + PROG_VERSION_DATE
+        print(os.path.basename(sys.argv[0]) + " version " + PROG_VERSION_NUMBER + \
+            " from " + PROG_VERSION_DATE)
         sys.exit(0)
 
     handle_logging()
@@ -257,9 +254,9 @@ def main():
 
             tabcompletiondescription = '; complete ' + str(len(vocabulary)) + ' words with TAB'
 
-        print '         (abort with Ctrl-C' + tabcompletiondescription + ')'
-        print
-        text = unicode(raw_input('Please enter text: ').strip(), "UTF-8")
+        print('         (abort with Ctrl-C' + tabcompletiondescription + ')')
+        print()
+        text = input('Please enter text: ').strip()
 
         if not text or len(text) < 1:
             logging.info("no text given, exiting.")
@@ -283,7 +280,7 @@ def main():
 
     logging.debug("successfully finished.")
     if options.verbose:
-        raw_input('Please press <Enter> for finishing...').strip()
+        input('Please press <Enter> for finishing...').strip()
 
 
 if __name__ == "__main__":
