@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Time-stamp: <2017-08-22 13:12:11 vk>
+PROG_VERSION = u"Time-stamp: <2017-08-22 13:13:18 vk>"
 
 ## TODO:
 ## * fix parts marked with «FIXXME»
@@ -21,8 +20,7 @@ import logging
 from optparse import OptionParser
 import readline  # for raw_input() reading from stdin
 
-PROG_VERSION_NUMBER = "0.3"
-PROG_VERSION_DATE = "2015-04-05"
+PROG_VERSION_DATE = PROG_VERSION[13:23]
 INVOCATION_TIME = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 FILENAME_TAG_SEPARATOR = ' -- '  # between file name and (optional) list of tags
 BETWEEN_TAG_SEPARATOR = ' '  # between tags (not that relevant in this tool)
@@ -53,7 +51,7 @@ Example usages:\n\
 :license: GPL v3 or any later version\n\
 :URL: https://github.com/novoid/filetag\n\
 :bugreports: via github or <tools@Karl-Voit.at>\n\
-:version: " + PROG_VERSION_NUMBER + " from " + PROG_VERSION_DATE + "\n"
+:version: " + PROG_VERSION_DATE + "\n"
 
 
 ## file names containing optional tags matches following regular expression
@@ -224,8 +222,7 @@ def main():
     """Main function"""
 
     if options.version:
-        print(os.path.basename(sys.argv[0]) + " version " + PROG_VERSION_NUMBER + \
-            " from " + PROG_VERSION_DATE)
+        print(os.path.basename(sys.argv[0]) + " version " + PROG_VERSION_DATE)
         sys.exit(0)
 
     handle_logging()
