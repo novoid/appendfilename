@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2017-08-22 13:13:18 vk>"
+PROG_VERSION = u"Time-stamp: <2017-08-29 14:42:43 vk>"
 
-## TODO:
-## * fix parts marked with «FIXXME»
+# TODO:
+# * fix parts marked with «FIXXME»
 
-## ===================================================================== ##
-##  You might not want to modify anything below this line if you do not  ##
-##  know, what you are doing :-)                                         ##
-## ===================================================================== ##
+# ===================================================================== ##
+#  You might not want to modify anything below this line if you do not  ##
+#  know, what you are doing :-)                                         ##
+# ===================================================================== ##
 
-## NOTE: in case of issues, check iCalendar files using: http://icalvalid.cloudapp.net/
+# NOTE: in case of issues, check iCalendar files using: http://icalvalid.cloudapp.net/
 
 import re
 import sys
@@ -54,22 +54,21 @@ Example usages:\n\
 :version: " + PROG_VERSION_DATE + "\n"
 
 
-## file names containing optional tags matches following regular expression
+# file names containing optional tags matches following regular expression
 FILE_WITH_EXTENSION_REGEX = re.compile("(.*?)(( -- .*)?(\.\w+?)?)$")
 FILE_WITH_EXTENSION_BASENAME_INDEX = 1
 FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX = 2
 
 
-
-## RegEx which defines "what is a file name component" for tab completion:
+# RegEx which defines "what is a file name component" for tab completion:
 FILENAME_COMPONENT_REGEX = re.compile("[a-zA-Z]+")
 
-## blacklist of lowercase strings that are being ignored for tab completion
+# blacklist of lowercase strings that are being ignored for tab completion
 FILENAME_COMPONENT_LOWERCASE_BLACKLIST = ['img', 'eine', 'einem', 'eines', 'fuer', 'haben',
                                           'machen', 'macht', 'mein', 'meine', 'meinem',
                                           'meinen', 'meines', 'neuem', 'neuer', 'neuen', 'vkvlc']
 
-## initial CV with strings that are provided for tab completion in any case (whitelist)
+# initial CV with strings that are provided for tab completion in any case (whitelist)
 INITIAL_CONTROLLED_VOCABULARY = ['Karl', 'Graz', 'LaTeX', 'specialL', 'specialP']
 
 parser = OptionParser(usage=USAGE)
@@ -116,7 +115,7 @@ def error_exit(errorcode, text):
 
 
 class SimpleCompleter(object):
-    ## happily stolen from http://pymotw.com/2/readline/
+    # happily stolen from http://pymotw.com/2/readline/
 
     def __init__(self, options):
         self.options = sorted(options)
@@ -157,15 +156,15 @@ def locate_and_parse_controlled_vocabulary():
     cv = INITIAL_CONTROLLED_VOCABULARY
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     for f in files:
-        ## extract all words from the file name that don't contain numbers
+        # extract all words from the file name that don't contain numbers
         new_items = FILENAME_COMPONENT_REGEX.findall(os.path.splitext(os.path.basename(f))[0])
-        ## remove words that are too small
+        # remove words that are too small
         new_items = [item for item in new_items if len(item) > 3]
-        ## remove words that are listed in the blacklist
+        # remove words that are listed in the blacklist
         new_items = [item for item in new_items if item.lower() not in FILENAME_COMPONENT_LOWERCASE_BLACKLIST]
-        ## remove words that are already in the controlled vocabulary
+        # remove words that are already in the controlled vocabulary
         new_items = [item for item in new_items if item not in cv]
-        ## append newly found words to the controlled vocabulary
+        # append newly found words to the controlled vocabulary
         cv.extend(new_items)
 
     if len(cv) > 0:
@@ -287,6 +286,4 @@ if __name__ == "__main__":
 
         logging.info("Received KeyboardInterrupt")
 
-## END OF FILE #################################################################
-
-#end
+# END OF FILE #################################################################
