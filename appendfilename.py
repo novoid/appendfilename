@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2017-08-29 14:42:43 vk>"
+PROG_VERSION = u"Time-stamp: <2017-08-29 17:54:10 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -25,6 +25,7 @@ INVOCATION_TIME = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 FILENAME_TAG_SEPARATOR = ' -- '  # between file name and (optional) list of tags
 BETWEEN_TAG_SEPARATOR = ' '  # between tags (not that relevant in this tool)
 TEXT_SEPARATOR = ' '  # between old file name and inserted text
+RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS = True  # if current file is a symlink with the same name, also rename source file
 
 USAGE = "\n\
     " + sys.argv[0] + " [<options>] <list of files>\n\
@@ -38,6 +39,9 @@ a set of tags separated with \"" + FILENAME_TAG_SEPARATOR + "\".\n\
   Update for the Boss " + TEXT_SEPARATOR + "<NEW TEXT HERE>.pptx\n\
   2013-05-16T15.31.42 Error message" + TEXT_SEPARATOR + "<NEW TEXT HERE>" \
     + FILENAME_TAG_SEPARATOR + "screenshot" + BETWEEN_TAG_SEPARATOR + "projectB.png\n\
+\n\
+When renaming a symbolic link whose source file has a matching file\n\
+name, the source file gets renamed as well.\n\
 \n\
 Example usages:\n\
   " + sys.argv[0] + " --text=\"of projectA\" \"the presentation.pptx\"\n\
@@ -173,12 +177,97 @@ def locate_and_parse_controlled_vocabulary():
         return False
 
 
+def is_broken_link(name):
+    """
+    This function determines if the given name points to a file that is a broken link.
+    It returns False for any other cases such as non existing files and so forth.
+
+    @param name: an unicode string containing a file name
+    @param return: boolean
+    """
+
+    if os.path.isfile(name):
+        return False
+
+    try:
+        return not os.path.exists(os.readlink(name))
+    except FileNotFoundError:
+        return False
+
+
+def is_nonbroken_symlink_file(filename):
+    """
+    Returns true if the filename is a non-broken symbolic link and not just an ordinary file. False, for any other case like no file at all.
+
+    @param filename: an unicode string containing a file name
+    @param return: bookean
+    """
+
+    if os.path.isfile(filename):
+        if os.path.islink(filename):
+            return True
+    else:
+        return False
+
+
+def get_link_source_file(filename):
+    """
+    Return a string representing the path to which the symbolic link points.
+
+    @param filename: an unicode string containing a file name
+    @param return: file path string
+    """
+
+    assert(os.path.islink(filename))
+    return os.readlink(filename)
+
+
+def handle_file_and_symlink_source_if_found(filename, text, dryrun):
+    """
+    Wraps handle_file() so that if the current filename is a symbolic link,
+    modify the source file and re-link its new name before handling the
+    current filename.
+
+    @param filename: string containing one file name
+    @param text: string that shall be added to file name(s)
+    @param dryrun: boolean which defines if files should be changed (False) or not (True)
+    @param return: error value or new filename
+    """
+
+    # if filename is a symbolic link and has same basename, tag the source file as well:
+    if RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS and is_nonbroken_symlink_file(filename):
+        old_sourcefilename = get_link_source_file(filename)
+
+        if os.path.basename(old_sourcefilename) == os.path.basename(filename):
+
+            new_sourcefilename = handle_file(old_sourcefilename, text, dryrun)
+            if old_sourcefilename != new_sourcefilename:
+                logging.info('Renaming the symlink-destination file of "' + filename + '" ("' +
+                             old_sourcefilename + '") as well …')
+                if options.dryrun:
+                    logging.debug('I would re-link the old sourcefilename "' + old_sourcefilename +
+                                  '" to the new one "' + new_sourcefilename + '"')
+                else:
+                    logging.debug('re-linking symlink "' + filename + '" from the old sourcefilename "' +
+                                  old_sourcefilename + '" to the new one "' + new_sourcefilename + '"')
+                    os.remove(filename)
+                    os.symlink(new_sourcefilename, filename)
+            else:
+                logging.debug('The old sourcefilename "' + old_sourcefilename + '" did not change. So therefore I don\'t re-link.')
+        else:
+            logging.debug('The file "' + os.path.basename(filename) + '" is a symlink to "' + old_sourcefilename +
+                          '" but they two do have different basenames. Therefore I ignore the original file.')
+
+    # after handling potential symlink originals, I now handle the file we were talking about in the first place:
+    return handle_file(filename, text, dryrun)
+
+
 def handle_file(filename, text, dryrun):
     """
     @param filename: one file name
     @param text: string that shall be added to file name(s)
     @param dryrun: boolean which defines if files should be changed (False) or not (True)
-    @param return: error value
+    @param return: error value or new filename
     """
 
     assert(isinstance(filename, str))
@@ -215,6 +304,8 @@ def handle_file(filename, text, dryrun):
             os.rename(filename, new_filename)
         except:
             error_exit(9, "Error while trying to rename file: " + str(sys.exc_info()))
+
+    return new_filename
 
 
 def main():
@@ -272,7 +363,14 @@ def main():
 
     logging.debug("iterate over files ...")
     for filename in files:
-        handle_file(filename, text, options.dryrun)
+
+        if is_broken_link(filename):
+            # skip broken links completely and write error message:
+            logging.error('File "' + filename + '" is a broken symbolic link. Skipping this one …')
+
+        else:
+            # if filename is a symbolic link, tag the source file as well:
+            handle_file_and_symlink_source_if_found(filename, text, options.dryrun)
 
     logging.debug("successfully finished.")
     if options.verbose:

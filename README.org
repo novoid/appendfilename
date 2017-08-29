@@ -1,4 +1,4 @@
-## Time-stamp: <2016-09-11 17:43:41 vk>
+## Time-stamp: <2017-08-29 17:55:01 vk>
 ## -*- coding: utf-8 -*-
 ## This file is best viewed with GNU Emacs Org-mode: http://orgmode.org/
 
@@ -70,6 +70,54 @@ For a complete list of parameters, please try:
 
 The file names within the current working directory is read in and all
 found words can be completed via TAB.
+
+-----------------------
+
+#+BEGIN_SRC sh :results output :wrap src
+./appendfilename.py --help
+#+END_SRC
+
+#+BEGIN_src
+Usage:
+    ./appendfilename.py [<options>] <list of files>
+
+This tool inserts text between the old file name and optional tags or file extension.
+
+
+Text within file names is placed between the actual file name and
+the file extension or (if found) between the actual file namd and
+a set of tags separated with " -- ".
+  Update for the Boss  <NEW TEXT HERE>.pptx
+  2013-05-16T15.31.42 Error message <NEW TEXT HERE> -- screenshot projectB.png
+
+When renaming a symbolic link whose source file has a matching file
+name, the source file gets renamed as well.
+
+Example usages:
+  ./appendfilename.py --text="of projectA" "the presentation.pptx"
+      ... results in "the presentation of projectA.pptx"
+  ./appendfilename.py "2013-05-09T16.17_img_00042 -- fun.jpeg"
+      ... with interactive input of "Peter" results in:
+          "2013-05-09T16.17_img_00042 Peter -- fun.jpeg"
+
+
+:copyright: (c) 2013 or later by Karl Voit <tools@Karl-Voit.at>
+:license: GPL v3 or any later version
+:URL: https://github.com/novoid/filetag
+:bugreports: via github or <tools@Karl-Voit.at>
+:version: 2017-08-29
+
+
+Options:
+  -h, --help            show this help message and exit
+  -t TEXT, --text=TEXT  the text to add to the file name
+  -s, --dryrun          enable dryrun mode: just simulate what would happen,
+                        do not modify file(s)
+  -v, --verbose         enable verbose mode
+  -q, --quiet           enable quiet mode
+  --version             display version and exit
+#+END_src
+
 
 ** Installation
 
