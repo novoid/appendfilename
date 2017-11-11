@@ -1,4 +1,4 @@
-## Time-stamp: <2017-08-29 17:55:01 vk>
+## Time-stamp: <2017-11-11 16:18:48 vk>
 ## -*- coding: utf-8 -*-
 ## This file is best viewed with GNU Emacs Org-mode: http://orgmode.org/
 
@@ -171,6 +171,196 @@ them in geeqie:
    your desired keyboard shortcut accordingly.
 
 I hope this method is as handy for you as it is for me :-)
+
+
+* Integration Into Common Tools
+
+** Integrating into Geeqie
+
+I am using [[http://geeqie.sourceforge.net/][geeqie]] for browsing/presenting image files. After I
+mark a set of images for adding file name descriptions, I just have to
+press ~a~ and I get asked for the input string. After entering the string and
+RETURN, the filenames are modified accordingly.
+
+Using GNU/Linux, this is quite easy accomplished. The only thing that
+is not straight forward is the need for a wrapper script. The wrapper
+script does provide a shell window for entering the tags.
+
+~vk-appendfilename-interactive-adding-wrapper-with-gnome-terminal.sh~ looks like:
+: #!/bin/sh
+:
+: /usr/bin/gnome-terminal \
+:     --geometry=73x5+330+5  \
+:     --tab-with-profile=big \
+:     --hide-menubar \
+:     -x /home/vk/src/appendfilename/appendfilename.py --interactive "${@}"
+:
+: #end
+
+~vk-appendfilename-interactive-removing-wrapper-with-gnome-terminal.sh~
+looks like:
+: #!/bin/sh
+:
+: /usr/bin/gnome-terminal \
+:     --geometry=73x5+330+5  \
+:     --tab-with-profile=big \
+:     --hide-menubar \
+:     -x /home/vk/src/appendfilename/appendfilename.py --interactive --remove "${@}"
+:
+: #end
+
+In ~$HOME/.config/geeqie/applications~ I wrote two desktop files such
+that geeqie shows the wrapper scripts as external editors to its
+image files:
+
+~$HOME/.config/geeqie/applications/add-tags.desktop~ looks like:
+: [Desktop Entry]
+: Name=appendfilename
+: GenericName=appendfilename
+: Comment=
+: Exec=/home/vk/src/misc/vk-appendfilename-interactive-adding-wrapper-with-gnome-terminal.sh %F
+: Icon=
+: Terminal=true
+: Type=Application
+: Categories=Application;Graphics;
+: hidden=false
+: MimeType=image/*;video/*;image/mpo;image/thm
+: Categories=X-Geeqie;
+
+~$HOME/.config/geeqie/applications/remove-tags.desktop~ looks like:
+: [Desktop Entry]
+: Name=appendfilename
+: GenericName=appendfilename
+: Comment=
+: Exec=/home/vk/src/misc/vk-appendfilename-interactive-removing-wrapper-with-gnome-terminal.sh %F
+: Icon=
+: Terminal=true
+: Type=Application
+: Categories=Application;Graphics;
+: hidden=false
+: MimeType=image/*;video/*;image/mpo;image/thm
+: Categories=X-Geeqie;
+
+In order to be able to use the keyboard shortcuts ~a~, you can define them in geeqie:
+1. Edit > Preferences > Preferences ... > Keyboard.
+2. Scroll to the bottom of the list.
+3. Double click in the ~KEY~-column of ~appendfilename~
+   and choose your desired keyboard shortcut accordingly.
+
+I hope this method is as handy for you as it is for me :-)
+
+
+** Integration into Thunar
+
+[[https://en.wikipedia.org/wiki/Thunar][Thunar]] is a popular GNU/Linux file browser for the xfce environment.
+
+Unfortunately, it is rather complicated to add custom commands to
+Thunar. I found [[https://askubuntu.com/questions/403922/keyboard-shortcut-for-thunar-custom-actions][a good description]] which you might want to follow.
+
+To my disappoinment, even this manual confguration is not stable
+somehow. From time to time, the IDs of ~$HOME/.config/Thunar/uca.xml~
+and ~$HOME/.config/Thunar/accels.scm~ differ.
+
+For people using Org-mode, I automated the updating process (not the
+initial adding process) to match IDs again:
+
+Script for checking "tag": do it ~tag-ID~ and path in ~accels.scm~ match?
+: #+BEGIN_SRC sh :var myname="tag"
+: ID=`egrep -A 2 "<name>$myname" $HOME/.config/Thunar/uca.xml | grep unique-id | sed 's#.*<unique-id>##' | sed 's#<.*$##'`
+: echo "$myname-ID of uca.xml: $ID"
+: echo "In accels.scm: "`grep -i "$ID" $HOME/.config/Thunar/accels.scm`
+: #+END_SRC
+
+If they don't match, following script re-writes ~accels.scm~ with the current ID:
+: #+BEGIN_SRC sh :var myname="tag" :var myshortcut="<Alt>t"
+: ID=`egrep -A 2 "<name>$myname" $HOME/.config/Thunar/uca.xml | grep unique-id | sed 's#.*<unique-id>##' | sed 's#<.*$##'`
+: echo "appending $myname-ID of uca.xml to accels.scm: $ID"
+: mv $HOME/.config/Thunar/accels.scm $HOME/.config/Thunar/accels.scm.OLD
+: grep -v "\"$myshortcut\"" $HOME/.config/Thunar/accels.scm.OLD > $HOME/.config/Thunar/accels.scm
+: rm $HOME/.config/Thunar/accels.scm.OLD
+: echo "(gtk_accel_path \"<Actions>/ThunarActions/uca-action-$ID\" \"$myshortcut\")" >> $HOME/.config/Thunar/accels.scm
+: #+END_SRC
+
+** Integration into Windows Explorer for single files
+
+Create a registry file =add_appendfilename_to_context_menu.reg= and edit it
+to meet the following template. Please make sure to replace the paths
+(python, =USERNAME= and =appendfilename.py=) accordingly:
+
+#+BEGIN_EXAMPLE
+Windows Registry Editor Version 5.00
+
+;; for files:
+
+[HKEY_CLASSES_ROOT\*\shell\appendfilename]
+@="appendfilename (single file)"
+
+[HKEY_CLASSES_ROOT\*\shell\appendfilename\command]
+@="C:\\Python36\\python.exe C:\\Users\\USERNAME\\src\\appendfilename\\appendfilename.py -i \"%1\""
+#+END_EXAMPLE
+
+Execute the reg-file, confirm the warnings (you are modifying your
+Windows registry after all) and cheer up when you notice "appendfilename
+(single file)" in the context menu of your Windows Explorer.
+
+As the heading and the link name suggests: [[https://stackoverflow.com/questions/6440715/how-to-pass-multiple-filenames-to-a-context-menu-shell-command][this method works on single
+files]]. So if you select three files and invoke this context menu item,
+you will get three different filetag-windows to tag one file each.
+
+** Integration into Windows Explorer for single and multiple selected files
+
+Create a batch file in your home directory. Adapt the paths to meet
+your setup. The content looks like:
+
+: C:\Python36\python.exe C:\Users\USERNAME\src\appendfilename\appendfilename.py -i %*
+
+If you want to confirm the process (and see error messages and so
+forth), you might want to append as well following line:
+
+: set /p DUMMY=Hit ENTER to continue ...
+
+My batch file is located in =C:\Users\USERNAME\bin\appendfilename.bat=. Now
+create a lnk file for it (e.g., via Ctrl-Shift-drag), rename the lnk
+file to =appendfilename.lnk= and move the lnk file to
+=~/AppData/Roaming/Microsoft/Windows/SendTo/=.
+
+This way, you get a nice entry in your context menu sub-menu "Send to"
+which is also correctly tagging selection of files as if you put the
+list of selected items to a single call of appendfilename.
+
+** Integration into FreeCommander
+
+[[http://freecommander.com/en/summary/][FreeCommander]] is a [[https://en.wikipedia.org/wiki/File_manager#Orthodox_file_managers][orthodox file manager]] for Windows. You can add
+appendfilename as an favorite command:
+
+- Tools → Favorite tools → Favorite tools edit... (S-C-y)
+  - Create new toolbar (if none is present)
+  - Icon for "Add new item"
+    - Name: appendfilename
+    - Program or folder: <Path to appendfilename.bar>
+	- =appendfilename.bat= looks like: (please do modify the paths to meet your requirement)
+        : C:\Python36\python.exe C:\Users\YOURUSERNAME\src\appendfilename\appendfilename %*
+	  : REM optionally: set /p DUMMY=Hit ENTER to continue...
+    - Start folder: =%ActivDir%=
+    - Parameter: =%ActivSel%=
+    - [X] Enclose each selected item with ="=
+    - Hotkey: select next available one such as =Ctrl-1= (it gets overwritten below)
+	- remember its name such as "Favorite tool 01"
+  - OK
+
+So far, we've got =appendfilename= added as a favorite command which can be
+accessed via menu or icon toolbar and the selected keyboard shortcut.
+If you want to assign a different keyboard shortcut than =Ctrl-1= like
+=Alt-a= you might as well follow following procedure:
+
+- Tools → Define keyboard shortcuts...
+  - Scroll down to the last section "Favorite tools"
+  - locate the name such as "Favorite tool 01"
+  - Define your shortcut of choice like =Alt-a= in the right hand side of the window
+    - If your shortcut is taken, you'll get a notification. Don't
+      overwrite essential shortcuts you're using.
+  - OK
+
 
 * Related tools and workflows
 
