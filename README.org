@@ -40,7 +40,7 @@ If I want to add a descriptive file name to files like ,e.g.,
 photographs, I have to rename the original file and insert the
 description at the right spot of the existing file name.
 
-This is not an error-prone task. If I am not careful, I can overwrite
+This is an error-prone task. If I am not careful, I can overwrite
 parts of the old file name I wanted to keep. Or I could mess up
 spacing between the old file name, tags, and the new description.
 
