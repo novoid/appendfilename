@@ -3,3 +3,8 @@ dist
 MANIFEST
 setup.py
 .gitignore
+update_pip.sh
+manualtests/
+.gitignore
+build/
+appendfilename.egg-info/

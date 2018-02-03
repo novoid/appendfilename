@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2018-02-03 17:28:20 vk>"
+PROG_VERSION = u"Time-stamp: <2018-02-03 18:00:59 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -28,7 +28,7 @@ TEXT_SEPARATOR = ' '  # between old file name and inserted text
 RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS = True  # if current file is a symlink with the same name, also rename source file
 
 USAGE = "\n\
-    " + sys.argv[0] + " [<options>] <list of files>\n\
+    appendfilename [<options>] <list of files>\n\
 \n\
 This tool inserts text between the old file name and optional tags or file extension.\n\
 \n\
@@ -44,9 +44,9 @@ When renaming a symbolic link whose source file has a matching file\n\
 name, the source file gets renamed as well.\n\
 \n\
 Example usages:\n\
-  " + sys.argv[0] + " --text=\"of projectA\" \"the presentation.pptx\"\n\
+  appendfilename --text=\"of projectA\" \"the presentation.pptx\"\n\
       ... results in \"the presentation" + TEXT_SEPARATOR + "of projectA.pptx\"\n\
-  " + sys.argv[0] + " \"2013-05-09T16.17_img_00042 -- fun.jpeg\"\n\
+  appendfilename \"2013-05-09T16.17_img_00042 -- fun.jpeg\"\n\
       ... with interactive input of \"Peter\" results in:\n\
           \"2013-05-09T16.17_img_00042" + TEXT_SEPARATOR + "Peter -- fun.jpeg\"\n\
 \n\
