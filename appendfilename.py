@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2017-08-29 17:54:10 vk>"
+PROG_VERSION = u"Time-stamp: <2018-02-03 17:28:20 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -53,7 +53,7 @@ Example usages:\n\
 \n\
 :copyright: (c) 2013 or later by Karl Voit <tools@Karl-Voit.at>\n\
 :license: GPL v3 or any later version\n\
-:URL: https://github.com/novoid/filetag\n\
+:URL: https://github.com/novoid/appendfilename\n\
 :bugreports: via github or <tools@Karl-Voit.at>\n\
 :version: " + PROG_VERSION_DATE + "\n"
 

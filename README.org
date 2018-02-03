@@ -101,7 +101,7 @@ Example usages:
 
 :copyright: (c) 2013 or later by Karl Voit <tools@Karl-Voit.at>
 :license: GPL v3 or any later version
-:URL: https://github.com/novoid/filetag
+:URL: https://github.com/novoid/appendfilename
 :bugreports: via github or <tools@Karl-Voit.at>
 :version: 2017-08-29
 
