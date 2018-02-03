@@ -1,8 +1,6 @@
-## Time-stamp: <2017-11-11 16:18:48 vk>
-## -*- coding: utf-8 -*-
-## This file is best viewed with GNU Emacs Org-mode: http://orgmode.org/
-
 * appendfilename.py
+
+[[file:screencast.gif]]
 
 This Python script adds a string to a file name. The string gets added
 between the original file name and its extension.
