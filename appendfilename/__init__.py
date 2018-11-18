@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2018-02-03 18:00:59 vk>"
+PROG_VERSION = u"Time-stamp: <2018-11-18 22:55:19 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -320,6 +320,11 @@ def main():
     if options.verbose and options.quiet:
         error_exit(1, "Options \"--verbose\" and \"--quiet\" found. " +
                    "This does not make any sense, you silly fool :-)")
+
+    if len(sys.argv) < 2:
+        # not a single command line parameter is given -> print help instead of asking for a string
+        parser.print_help()
+        sys.exit(0)
 
     text = options.text
 
