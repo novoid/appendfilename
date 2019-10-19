@@ -8,3 +8,4 @@ manualtests/
 .gitignore
 build/
 appendfilename.egg-info/
+venv/
