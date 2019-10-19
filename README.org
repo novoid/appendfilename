@@ -9,13 +9,16 @@ In case the file name contains tags as handled as with [[https://github.com/novo
 string gets added right before the separator between file name and
 tags.
 
-Examples for adding the string "foo bar":
+Examples for adding the string "new text":
 
-| *old file name*                        | *new file name*                                |
-|----------------------------------------+------------------------------------------------|
-| a simple file.txt                      | a simple file foo bar.txt                      |
-| 2013-05-09T16.17_img_00042.jpeg        | 2013-05-09T16.17_img_00042 foo bar.jpeg        |
-| 2013-05-09T16.17_img_00042 -- fun.jpeg | 2013-05-09T16.17_img_00042 foo bar -- fun.jpeg |
+| *old file name*                        | *new file name*                                 |
+|----------------------------------------+-------------------------------------------------|
+| a simple file.txt                      | a simple file new text.txt                      |
+| a simple file -- foo bar.txt           | a simple file new text -- foo bar.txt           |
+| 2013-05-09.jpeg                        | 2013-05-09 new text.jpeg                        |
+| 2013-05-09T16.17.jpeg                  | 2013-05-09T16.17 new text.jpeg                  |
+| 2013-05-09T16.17_img_00042.jpeg        | 2013-05-09T16.17_img_00042 new text.jpeg        |
+| 2013-05-09T16.17_img_00042 -- fun.jpeg | 2013-05-09T16.17_img_00042 new text -- fun.jpeg |
 
 - *Target group*: users who are able to use command line tools and who
   are using tags in file names.
