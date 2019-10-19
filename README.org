@@ -77,7 +77,7 @@ found words can be completed via TAB.
 
 #+BEGIN_src
 Usage:
-    appendfilename.py [<options>] <list of files>
+    appendfilename [<options>] <list of files>
 
 This tool inserts text between the old file name and optional tags or file extension.
 
@@ -92,9 +92,9 @@ When renaming a symbolic link whose source file has a matching file
 name, the source file gets renamed as well.
 
 Example usages:
-  appendfilename.py --text="of projectA" "the presentation.pptx"
+  appendfilename --text="of projectA" "the presentation.pptx"
       ... results in "the presentation of projectA.pptx"
-  appendfilename.py "2013-05-09T16.17_img_00042 -- fun.jpeg"
+  appendfilename "2013-05-09T16.17_img_00042 -- fun.jpeg"
       ... with interactive input of "Peter" results in:
           "2013-05-09T16.17_img_00042 Peter -- fun.jpeg"
 
@@ -103,12 +103,17 @@ Example usages:
 :license: GPL v3 or any later version
 :URL: https://github.com/novoid/appendfilename
 :bugreports: via github or <tools@Karl-Voit.at>
-:version: 2017-08-29
+:version: 2019-10-19
 
 
 Options:
   -h, --help            show this help message and exit
   -t TEXT, --text=TEXT  the text to add to the file name
+  -p, --prepend         Do the opposite: instead of appending the text,
+                        prepend the text
+  --smart-prepend       Like "--prepend" but do respect date/time-stamps:
+                        insert new text between "YYYY-MM-DD(Thh.mm(.ss))" and
+                        rest
   -s, --dryrun          enable dryrun mode: just simulate what would happen,
                         do not modify file(s)
   -v, --verbose         enable verbose mode
@@ -116,10 +121,29 @@ Options:
   --version             display version and exit
 #+END_src
 
-
 ** Installation
 
-Get it from [[https://github.com/novoid/appendfilename][GitHub]] or install it via «pip install appendfilename».
+Get it from [[https://github.com/novoid/appendfilename][GitHub]] or install it via =pip install appendfilename=
+
+** Smart Prepend
+
+Although =appendfilename= was created mainly to /add text at the end
+of a file name/, it may also insert text at the beginning of a file
+name using the =--prepend= parameter.
+
+A variance of that is =--smart-prepend=. Following examples
+demonstrate the effects on smart prepending "new text" with various
+file names:
+
+: new text foo bar.txt
+: 2019-10-20 new text foo bar.txt
+: 2019-10-20T12.34 new text foo bar.txt
+: 2019-10-20T12.34.56 new text foo bar.txt
+
+As you can see, =--smart-prepend= does take into account that a given
+date/time-stamp according to [[https://github.com/novoid/date2name][date2name]] and [[https://karl-voit.at/managing-digital-photographs/][this article]] will always
+stay the first part of a file name, prepending the "new text" between
+the date/time-stamp and the rest.
 
 ** Bonus: integrating into Geeqie (or similar file browsers)
 

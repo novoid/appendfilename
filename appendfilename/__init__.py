@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2018-11-18 22:55:19 vk>"
+PROG_VERSION = u"Time-stamp: <2019-10-19 17:04:17 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -26,6 +26,7 @@ FILENAME_TAG_SEPARATOR = ' -- '  # between file name and (optional) list of tags
 BETWEEN_TAG_SEPARATOR = ' '  # between tags (not that relevant in this tool)
 TEXT_SEPARATOR = ' '  # between old file name and inserted text
 RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS = True  # if current file is a symlink with the same name, also rename source file
+WITHTIME_AND_SECONDS_PATTERN  = re.compile('^(\d{4,4}-[01]\d-[0123]\d(([T :_-])([012]\d)([:.-])([012345]\d)(([:.-])([012345]\d))?)?)[- _.](.+)')
 
 USAGE = "\n\
     appendfilename [<options>] <list of files>\n\
@@ -79,6 +80,12 @@ parser = OptionParser(usage=USAGE)
 
 parser.add_option("-t", "--text", dest="text",
                   help="the text to add to the file name")
+
+parser.add_option("-p", "--prepend", dest="prepend", action="store_true",
+                  help="Do the opposite: instead of appending the text, prepend the text")
+
+parser.add_option("--smart-prepend", dest="smartprepend", action="store_true",
+                  help="Like \"--prepend\" but do respect date/time-stamps: insert new text between \"YYYY-MM-DD(Thh.mm(.ss))\" and rest")
 
 parser.add_option("-s", "--dryrun", dest="dryrun", action="store_true",
                   help="enable dryrun mode: just simulate what would happen, do not modify file(s)")
@@ -288,7 +295,19 @@ def handle_file(filename, text, dryrun):
         return
 
     try:
-        new_filename = os.path.join(os.path.dirname(filename), old_basename + TEXT_SEPARATOR + text + tags_with_extension)
+        if options.prepend:
+            new_filename = os.path.join(os.path.dirname(filename), text + TEXT_SEPARATOR + old_basename + tags_with_extension)
+        elif options.smartprepend:
+            match = re.match(WITHTIME_AND_SECONDS_PATTERN, filename)
+            if not match:
+                logging.debug('can\'t find a date/time-stamp, doing a simple prepend')
+                new_filename = os.path.join(os.path.dirname(filename), text + TEXT_SEPARATOR + old_basename + tags_with_extension)
+            else:
+                logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
+                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + TEXT_SEPARATOR + text + TEXT_SEPARATOR + match.group(len(match.groups())))
+                #import pdb; pdb.set_trace()
+        else:
+            new_filename = os.path.join(os.path.dirname(filename), old_basename + TEXT_SEPARATOR + text + tags_with_extension)
     except:
         error_exit(7, "Error while trying to build new filename: " + str(sys.exc_info()[0]))
     assert(isinstance(new_filename, str))
@@ -319,6 +338,10 @@ def main():
 
     if options.verbose and options.quiet:
         error_exit(1, "Options \"--verbose\" and \"--quiet\" found. " +
+                   "This does not make any sense, you silly fool :-)")
+
+    if options.prepend and options.smartprepend:
+        error_exit(3, "Options \"--prepend\" and \"--smart-prepend\" found. " +
                    "This does not make any sense, you silly fool :-)")
 
     if len(sys.argv) < 2:
