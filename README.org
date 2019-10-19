@@ -26,10 +26,10 @@ Examples for adding the string "new text":
 
 ** Why
 
-Besides the fact that I am using [[https://en.wikipedia.org/wiki/Iso_date][ISO dates and times]] in file names
-(as shown in examples above), I am using tags with file names. To
-separate tags from the file name, I am using the separator = -- =
-(space dash dash space).
+Besides the fact that I am using [[https://en.wikipedia.org/wiki/Iso_date][ISO dates and times]] in file names (as
+shown in examples above), I am using tags with file names. To separate
+tags from the file name, I am using the four separator characters:
+space dash dash space.
 
 For people familiar with [[https://en.wikipedia.org/wiki/Regex][Regular Expressions]]:
 
@@ -37,7 +37,7 @@ For people familiar with [[https://en.wikipedia.org/wiki/Regex][Regular Expressi
 
 For tagging, please refer to [[https://github.com/novoid/filetag][filetag]] and its documentation.
 
-If I want to add a descriptive file name to files like ,e.g.,
+If I want to add a descriptive file name to files like , e.g. ,
 photographs, I have to rename the original file and insert the
 description at the right spot of the existing file name.
 
