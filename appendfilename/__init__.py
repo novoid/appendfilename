@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2019-10-19 17:04:17 vk>"
+PROG_VERSION = u"Time-stamp: <2019-10-20 11:27:21 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -87,7 +87,7 @@ parser.add_option("-p", "--prepend", dest="prepend", action="store_true",
 parser.add_option("--smart-prepend", dest="smartprepend", action="store_true",
                   help="Like \"--prepend\" but do respect date/time-stamps: insert new text between \"YYYY-MM-DD(Thh.mm(.ss))\" and rest")
 
-parser.add_option("-s", "--dryrun", dest="dryrun", action="store_true",
+parser.add_option("-d", "--dryrun", dest="dryrun", action="store_true",
                   help="enable dryrun mode: just simulate what would happen, do not modify file(s)")
 
 parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
