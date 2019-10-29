@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2019-10-20 11:27:21 vk>"
+PROG_VERSION = u"Time-stamp: <2019-10-29 12:02:44 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -193,7 +193,7 @@ def is_broken_link(name):
     @param return: boolean
     """
 
-    if os.path.isfile(name):
+    if os.path.isfile(name) or os.path.isdir(name):
         return False
 
     try:
