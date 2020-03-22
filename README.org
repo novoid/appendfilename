@@ -1,12 +1,12 @@
 * appendfilename.py
 
-[[file:bin/screencast.gif]]
-
 #+BEGIN_HTML
 <a href="https://karl-voit.at/demo-appendfilename">
 <img src="https://raw.githubusercontent.com/novoid/screencasts/master/file_management/appendfilename.gif" />
 </a>
 #+END_HTML
+
+[[file:bin/screencast.gif]]
 
 This Python script adds a string to a file name. The string gets added
 between the original file name and its extension.
