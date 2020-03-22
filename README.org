@@ -205,6 +205,67 @@ I hope this method is as handy for you as it is for me :-)
 
 * Integration Into Common Tools
 
+** Integration into Windows File Explorer
+
+The easiest way to integrate =appendfilename= into File Explorer
+("Send to" context menu) is by using [[https://github.com/novoid/integratethis][integratethis]].
+
+Execute this in your command line environment:
+
+: pip install appendfilename integratethis
+: integratethis appendfilename --confirm
+
+*** Windows File Explorer for single files (manual method)
+
+Use this only if the [[https://github.com/novoid/integratethis][integratethis]] method can not be applied:
+
+Create a registry file =add_appendfilename_to_context_menu.reg= and edit it
+to meet the following template. Please make sure to replace the paths
+(python, =USERNAME= and =appendfilename=) accordingly:
+
+#+BEGIN_EXAMPLE
+Windows Registry Editor Version 5.00
+
+;; for files:
+
+[HKEY_CLASSES_ROOT\*\shell\appendfilename]
+@="appendfilename (single file)"
+
+[HKEY_CLASSES_ROOT\*\shell\appendfilename\command]
+@="C:\\Python36\\python.exe C:\\Users\\USERNAME\\src\\appendfilename\\appendfilename\\__init__.py -i \"%1\""
+#+END_EXAMPLE
+
+Execute the reg-file, confirm the warnings (you are modifying your
+Windows registry after all) and cheer up when you notice "appendfilename
+(single file)" in the context menu of your Windows Explorer.
+
+As the heading and the link name suggests: [[https://stackoverflow.com/questions/6440715/how-to-pass-multiple-filenames-to-a-context-menu-shell-command][this method works on single
+files]]. So if you select three files and invoke this context menu item,
+you will get three different filetag-windows to tag one file each.
+
+*** Windows File Explorer for single and multiple selected files (manual method)
+
+Use this only if the [[https://github.com/novoid/integratethis][integratethis]] method can not be applied:
+
+Create a batch file in your home directory. Adapt the paths to meet
+your setup. The content looks like:
+
+: C:\Python36\python.exe C:\Users\USERNAME\src\appendfilename\appendfilename\__init__.py -i %*
+
+If you want to confirm the process (and see error messages and so
+forth), you might want to append as well following line:
+
+: set /p DUMMY=Hit ENTER to continue ...
+
+My batch file is located in =C:\Users\USERNAME\bin\appendfilename.bat=. Now
+create a lnk file for it (e.g., via Ctrl-Shift-drag), rename the lnk
+file to =appendfilename.lnk= and move the lnk file to
+=~/AppData/Roaming/Microsoft/Windows/SendTo/=.
+
+This way, you get a nice entry in your context menu sub-menu "Send to"
+which is also correctly tagging selection of files as if you put the
+list of selected items to a single call of appendfilename.
+
 ** Integrating into Geeqie
 
 I am using [[http://geeqie.sourceforge.net/][geeqie]] for browsing/presenting image files. After I
@@ -313,67 +374,6 @@ If they don't match, following script re-writes ~accels.scm~ with the current ID
 : rm $HOME/.config/Thunar/accels.scm.OLD
 : echo "(gtk_accel_path \"<Actions>/ThunarActions/uca-action-$ID\" \"$myshortcut\")" >> $HOME/.config/Thunar/accels.scm
 : #+END_SRC
-
-** Integration into Windows File Explorer
-
-The easiest way to integrate =appendfilename= into File Explorer
-("Send to" context menu) is by using [[https://github.com/novoid/integratethis][integratethis]].
-
-Execute this in your command line environment:
-
-: pip install appendfilename integratethis
-: integratethis appendfilename --confirm
-
-*** Windows File Explorer for single files (manual method)
-
-Use this only if the [[https://github.com/novoid/integratethis][integratethis]] method can not be applied:
-
-Create a registry file =add_appendfilename_to_context_menu.reg= and edit it
-to meet the following template. Please make sure to replace the paths
-(python, =USERNAME= and =appendfilename=) accordingly:
-
-#+BEGIN_EXAMPLE
-Windows Registry Editor Version 5.00
-
-;; for files:
-
-[HKEY_CLASSES_ROOT\*\shell\appendfilename]
-@="appendfilename (single file)"
-
-[HKEY_CLASSES_ROOT\*\shell\appendfilename\command]
-@="C:\\Python36\\python.exe C:\\Users\\USERNAME\\src\\appendfilename\\appendfilename\\__init__.py -i \"%1\""
-#+END_EXAMPLE
-
-Execute the reg-file, confirm the warnings (you are modifying your
-Windows registry after all) and cheer up when you notice "appendfilename
-(single file)" in the context menu of your Windows Explorer.
-
-As the heading and the link name suggests: [[https://stackoverflow.com/questions/6440715/how-to-pass-multiple-filenames-to-a-context-menu-shell-command][this method works on single
-files]]. So if you select three files and invoke this context menu item,
-you will get three different filetag-windows to tag one file each.
-
-*** Windows File Explorer for single and multiple selected files (manual method)
-
-Use this only if the [[https://github.com/novoid/integratethis][integratethis]] method can not be applied:
-
-Create a batch file in your home directory. Adapt the paths to meet
-your setup. The content looks like:
-
-: C:\Python36\python.exe C:\Users\USERNAME\src\appendfilename\appendfilename\__init__.py -i %*
-
-If you want to confirm the process (and see error messages and so
-forth), you might want to append as well following line:
-
-: set /p DUMMY=Hit ENTER to continue ...
-
-My batch file is located in =C:\Users\USERNAME\bin\appendfilename.bat=. Now
-create a lnk file for it (e.g., via Ctrl-Shift-drag), rename the lnk
-file to =appendfilename.lnk= and move the lnk file to
-=~/AppData/Roaming/Microsoft/Windows/SendTo/=.
-
-This way, you get a nice entry in your context menu sub-menu "Send to"
-which is also correctly tagging selection of files as if you put the
-list of selected items to a single call of appendfilename.
 
 ** Integration into FreeCommander
 
