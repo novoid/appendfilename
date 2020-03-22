@@ -2,6 +2,12 @@
 
 [[file:bin/screencast.gif]]
 
+#+BEGIN_HTML
+<a href="https://karl-voit.at/demo-appendfilename">
+<img src="https://raw.githubusercontent.com/novoid/screencasts/master/file_management/appendfilename.gif" />
+</a>
+#+END_HTML
+
 This Python script adds a string to a file name. The string gets added
 between the original file name and its extension.
 
@@ -432,9 +438,3 @@ I'm glad you like my tools. If you want to support me:
 - Contribute merge requests for bug fixes
 - Check out my other cool [[https://github.com/novoid][projects on GitHub]]
 
-* Local Variables                                                  :noexport:
-# Local Variables:
-# mode: auto-fill
-# mode: flyspell
-# eval: (ispell-change-dictionary "en_US")
-# End:
