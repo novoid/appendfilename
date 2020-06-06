@@ -154,54 +154,6 @@ date/time-stamp according to [[https://github.com/novoid/date2name][date2name]] 
 stay the first part of a file name, prepending the "new text" between
 the date/time-stamp and the rest.
 
-** Bonus: integrating into Geeqie (or similar file browsers)
-
-I am using [[http://geeqie.sourceforge.net/][geeqie]] for browsing/presenting image files. For quickly
-adding descriptive text to image file(s), I mapped this script to
-~r~. This way, I can go through my image files very quickly and do not
-have to worry about placing cursor in the rename dialog of geeqie.
-
-Using GNU/Linux, this is quite easy accomplished. The only thing that
-is not straight forward is the need for a wrapper script. The wrapper
-script does provide a shell window for entering the tags.
-
-~vk-appendfilename-interactive-wrapper-with-gnome-terminal.sh~ looks like:
-: #!/bin/sh
-:
-: /usr/bin/gnome-terminal \
-:     --geometry=90x5+330+5  \
-:     --hide-menubar \
-:     -x /home/vk/src/appendfilename/appendfilename/__init__.py "${@}"
-:
-: #end
-
-In ~$HOME/.config/geeqie/applications~ I wrote a desktop file such
-that geeqie shows the wrapper script as external editor to its
-image files:
-
-~$HOME/.config/geeqie/applications/appendfilename.desktop~ looks like:
-: [Desktop Entry]
-: Name=appendfilename
-: GenericName=appendfilename
-: Comment=
-: Exec=/home/vk/src/misc/vk-appendfilename-interactive-wrapper-with-gnome-terminal.sh %F
-: Icon=
-: Terminal=true
-: Type=Application
-: Categories=Application;Graphics;
-: hidden=false
-: MimeType=image/*;video/*;image/mpo;image/thm
-: Categories=X-Geeqie;
-
-In order to be able to use the keyboard shortcuts ~r~, you can define
-them in geeqie:
-1. Edit > Preferences > Preferences ... > Keyboard.
-2. Scroll to the bottom of the list.
-3. Double click in the ~KEY~-column of ~appendfilename~ and choose
-   your desired keyboard shortcut accordingly.
-
-I hope this method is as handy for you as it is for me :-)
-
 
 * Integration Into Common Tools
 
@@ -265,6 +217,7 @@ file to =appendfilename.lnk= and move the lnk file to
 This way, you get a nice entry in your context menu sub-menu "Send to"
 which is also correctly tagging selection of files as if you put the
 list of selected items to a single call of appendfilename.
+
 
 ** Integrating into Geeqie
 
@@ -342,7 +295,6 @@ In order to be able to use the keyboard shortcuts ~a~, you can define them in ge
    and choose your desired keyboard shortcut accordingly.
 
 I hope this method is as handy for you as it is for me :-)
-
 
 ** Integration into Thunar
 
