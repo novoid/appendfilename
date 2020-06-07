@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2019-10-29 12:02:44 vk>"
+PROG_VERSION = u"Time-stamp: <2020-06-07 17:40:24 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -121,7 +121,7 @@ def error_exit(errorcode, text):
 
     sys.stdout.flush()
     logging.error(text)
-    input('Press <Enter> to finish with return value %i ...' % errorcode).strip()
+    #input('Press <Enter> to finish with return value %i ...' % errorcode).strip()
     sys.exit(errorcode)
 
 
@@ -238,8 +238,10 @@ def handle_file_and_symlink_source_if_found(filename, text, dryrun):
     @param filename: string containing one file name
     @param text: string that shall be added to file name(s)
     @param dryrun: boolean which defines if files should be changed (False) or not (True)
-    @param return: error value or new filename
+    @param return: number of errors and optional new filename
     """
+
+    num_errors = 0
 
     # if filename is a symbolic link and has same basename, tag the source file as well:
     if RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS and is_nonbroken_symlink_file(filename):
@@ -247,7 +249,9 @@ def handle_file_and_symlink_source_if_found(filename, text, dryrun):
 
         if os.path.basename(old_sourcefilename) == os.path.basename(filename):
 
-            new_sourcefilename = handle_file(old_sourcefilename, text, dryrun)
+            new_errors, new_sourcefilename = handle_file(old_sourcefilename, text, dryrun)
+            num_errors += new_errors
+
             if old_sourcefilename != new_sourcefilename:
                 logging.info('Renaming the symlink-destination file of "' + filename + '" ("' +
                              old_sourcefilename + '") as well …')
@@ -274,17 +278,20 @@ def handle_file(filename, text, dryrun):
     @param filename: one file name
     @param text: string that shall be added to file name(s)
     @param dryrun: boolean which defines if files should be changed (False) or not (True)
-    @param return: error value or new filename
+    @param return: number of errors and optional new filename
     """
 
     assert(isinstance(filename, str))
+    num_errors = 0
 
     if os.path.isdir(filename):
         logging.warning("Skipping directory \"%s\" because this tool only processes file names." % filename)
-        return
+        num_errors += 1
+        return num_errors, False
     elif not os.path.isfile(filename):
         logging.error("Skipping \"%s\" because this tool only processes existing file names." % filename)
-        return
+        num_errors += 1
+        return num_errors, False
 
     components = re.match(FILE_WITH_EXTENSION_REGEX, os.path.basename(filename))
     if components:
@@ -292,7 +299,8 @@ def handle_file(filename, text, dryrun):
         tags_with_extension = components.group(FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX)
     else:
         logging.error('Could not extract file name components of \"%s\". Please do report.' % str(filename))
-        return
+        num_errors += 1
+        return num_errors, False
 
     try:
         if options.prepend:
@@ -309,7 +317,9 @@ def handle_file(filename, text, dryrun):
         else:
             new_filename = os.path.join(os.path.dirname(filename), old_basename + TEXT_SEPARATOR + text + tags_with_extension)
     except:
-        error_exit(7, "Error while trying to build new filename: " + str(sys.exc_info()[0]))
+        logging.error("Error while trying to build new filename: " + str(sys.exc_info()[0]))
+        num_errors += 1
+        return num_errors, False
     assert(isinstance(new_filename, str))
 
     if dryrun:
@@ -322,9 +332,11 @@ def handle_file(filename, text, dryrun):
         try:
             os.rename(filename, new_filename)
         except:
-            error_exit(9, "Error while trying to rename file: " + str(sys.exc_info()))
+            logging.error("Error while trying to rename file: " + str(sys.exc_info()))
+            num_errors += 1
+            return num_errors, False
 
-    return new_filename
+    return num_errors, new_filename
 
 
 def main():
@@ -398,7 +410,10 @@ def main():
 
         else:
             # if filename is a symbolic link, tag the source file as well:
-            handle_file_and_symlink_source_if_found(filename, text, options.dryrun)
+            num_errors, new_filename = handle_file_and_symlink_source_if_found(filename, text, options.dryrun)
+
+    if num_errors > 0:
+        error_exit(4, str(num_errors) + ' error(s) occurred. Please check output above.')
 
     logging.debug("successfully finished.")
     if options.verbose:
