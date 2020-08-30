@@ -238,7 +238,7 @@ script does provide a shell window for entering the tags.
 /usr/bin/gnome-terminal \
     --geometry=73x5+330+5  \
     --hide-menubar \
-    -x /home/vk/src/appendfilename/appendfilename/__init__.py --interactive "${@}"
+    -x /home/vk/src/appendfilename/appendfilename/__init__.py "${@}"
 
 #end
 #+END_SRC
@@ -251,7 +251,7 @@ looks like:
 /usr/bin/gnome-terminal \
     --geometry=73x5+330+5  \
     --hide-menubar \
-    -x /home/vk/src/appendfilename/appendfilename/__init__.py --interactive --remove "${@}"
+    -x /home/vk/src/appendfilename/appendfilename/__init__.py --remove "${@}"
 
 #end
 #+END_SRC
