@@ -230,7 +230,7 @@ Using GNU/Linux, this is quite easy accomplished. The only thing that
 is not straight forward is the need for a wrapper script. The wrapper
 script does provide a shell window for entering the tags.
 
-~vk-appendfilename-interactive-adding-wrapper-with-gnome-terminal.sh~ looks like:
+~vk-appendfilename-interactive-wrapper-with-gnome-terminal.sh~ looks like:
 
 #+BEGIN_SRC sh
 #!/bin/sh
@@ -239,19 +239,6 @@ script does provide a shell window for entering the tags.
     --geometry=73x5+330+5  \
     --hide-menubar \
     -x /home/vk/src/appendfilename/appendfilename/__init__.py "${@}"
-
-#end
-#+END_SRC
-
-~vk-appendfilename-interactive-removing-wrapper-with-gnome-terminal.sh~
-looks like:
-#+BEGIN_SRC sh
-#!/bin/sh
-
-/usr/bin/gnome-terminal \
-    --geometry=73x5+330+5  \
-    --hide-menubar \
-    -x /home/vk/src/appendfilename/appendfilename/__init__.py --remove "${@}"
 
 #end
 #+END_SRC
@@ -265,21 +252,7 @@ image files:
 : Name=appendfilename
 : GenericName=appendfilename
 : Comment=
-: Exec=/home/vk/src/misc/vk-appendfilename-interactive-adding-wrapper-with-gnome-terminal.sh %F
-: Icon=
-: Terminal=true
-: Type=Application
-: Categories=Application;Graphics;
-: hidden=false
-: MimeType=image/*;video/*;image/mpo;image/thm
-: Categories=X-Geeqie;
-
-~$HOME/.config/geeqie/applications/remove-tags.desktop~ looks like:
-: [Desktop Entry]
-: Name=appendfilename
-: GenericName=appendfilename
-: Comment=
-: Exec=/home/vk/src/misc/vk-appendfilename-interactive-removing-wrapper-with-gnome-terminal.sh %F
+: Exec=/home/vk/src/misc/vk-appendfilename-interactive-wrapper-with-gnome-terminal.sh %F
 : Icon=
 : Terminal=true
 : Type=Application
