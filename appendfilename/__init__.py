@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2022-01-01 11:15:47 vk>"
+PROG_VERSION = u"Time-stamp: <2022-01-01 11:25:53 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -82,7 +82,7 @@ parser.add_option("-t", "--text", dest="text",
                   help="the text to add to the file name")
 
 parser.add_option("-p", "--prepend", dest="prepend", action="store_true",
-                  help="Do the opposite: instead of appending the text, prepend the text")
+                  help="do the opposite: instead of appending the text, prepend the text")
 
 parser.add_option("--smart-prepend", dest="smartprepend", action="store_true",
                   help="Like \"--prepend\" but do respect date/time-stamps: insert new text between \"YYYY-MM-DD(Thh.mm(.ss))\" and rest")
@@ -90,7 +90,7 @@ parser.add_option("--smart-prepend", dest="smartprepend", action="store_true",
 parser.add_option("--separator",
                   metavar="separator",
                   default=" ",
-                  help='Specify the text separator (default: "' + DEFAULT_TEXT_SEPARATOR + '").')
+                  help='override the defailt text separator which is "' + DEFAULT_TEXT_SEPARATOR + '"')
 
 parser.add_option("-d", "--dryrun", dest="dryrun", action="store_true",
                   help="enable dryrun mode: just simulate what would happen, do not modify file(s)")
@@ -309,18 +309,18 @@ def handle_file(filename, text, dryrun):
 
     try:
         if options.prepend:
-            new_filename = os.path.join(os.path.dirname(filename), text + DEFAULT_TEXT_SEPARATOR + old_basename + tags_with_extension)
+            new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
         elif options.smartprepend:
             match = re.match(WITHTIME_AND_SECONDS_PATTERN, filename)
             if not match:
                 logging.debug('can\'t find a date/time-stamp, doing a simple prepend')
-                new_filename = os.path.join(os.path.dirname(filename), text + DEFAULT_TEXT_SEPARATOR + old_basename + tags_with_extension)
+                new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
             else:
                 logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
-                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + DEFAULT_TEXT_SEPARATOR + text + DEFAULT_TEXT_SEPARATOR + match.group(len(match.groups())))
+                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + separator() + text + separator + match.group(len(match.groups())))
                 #import pdb; pdb.set_trace()
         else:
-            new_filename = os.path.join(os.path.dirname(filename), old_basename + DEFAULT_TEXT_SEPARATOR + text + tags_with_extension)
+            new_filename = os.path.join(os.path.dirname(filename), old_basename + separator() + text + tags_with_extension)
     except:
         logging.error("Error while trying to build new filename: " + str(sys.exc_info()[0]))
         num_errors += 1
@@ -342,6 +342,15 @@ def handle_file(filename, text, dryrun):
             return num_errors, False
 
     return num_errors, new_filename
+
+
+def separator():
+    """returns the separator between the previous file name and the new text"""
+    if options.separator:
+        ## FIXXME: the user-provided separator is not checked at all: please do add some checks like removing '\n' and similar.
+        return options.separator
+    else:
+        return DEFAULT_TEXT_SEPARATOR
 
 
 def main():
