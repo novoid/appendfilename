@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2020-06-07 17:40:24 vk>"
+PROG_VERSION = u"Time-stamp: <2022-01-01 11:15:47 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -24,7 +24,7 @@ PROG_VERSION_DATE = PROG_VERSION[13:23]
 INVOCATION_TIME = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 FILENAME_TAG_SEPARATOR = ' -- '  # between file name and (optional) list of tags
 BETWEEN_TAG_SEPARATOR = ' '  # between tags (not that relevant in this tool)
-TEXT_SEPARATOR = ' '  # between old file name and inserted text
+DEFAULT_TEXT_SEPARATOR = ' '  # between old file name and inserted text
 RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS = True  # if current file is a symlink with the same name, also rename source file
 WITHTIME_AND_SECONDS_PATTERN  = re.compile('^(\d{4,4}-[01]\d-[0123]\d(([T :_-])([012]\d)([:.-])([012345]\d)(([:.-])([012345]\d))?)?)[- _.](.+)')
 
@@ -37,8 +37,8 @@ This tool inserts text between the old file name and optional tags or file exten
 Text within file names is placed between the actual file name and\n\
 the file extension or (if found) between the actual file namd and\n\
 a set of tags separated with \"" + FILENAME_TAG_SEPARATOR + "\".\n\
-  Update for the Boss " + TEXT_SEPARATOR + "<NEW TEXT HERE>.pptx\n\
-  2013-05-16T15.31.42 Error message" + TEXT_SEPARATOR + "<NEW TEXT HERE>" \
+  Update for the Boss " + DEFAULT_TEXT_SEPARATOR + "<NEW TEXT HERE>.pptx\n\
+  2013-05-16T15.31.42 Error message" + DEFAULT_TEXT_SEPARATOR + "<NEW TEXT HERE>" \
     + FILENAME_TAG_SEPARATOR + "screenshot" + BETWEEN_TAG_SEPARATOR + "projectB.png\n\
 \n\
 When renaming a symbolic link whose source file has a matching file\n\
@@ -46,10 +46,10 @@ name, the source file gets renamed as well.\n\
 \n\
 Example usages:\n\
   appendfilename --text=\"of projectA\" \"the presentation.pptx\"\n\
-      ... results in \"the presentation" + TEXT_SEPARATOR + "of projectA.pptx\"\n\
+      ... results in \"the presentation" + DEFAULT_TEXT_SEPARATOR + "of projectA.pptx\"\n\
   appendfilename \"2013-05-09T16.17_img_00042 -- fun.jpeg\"\n\
       ... with interactive input of \"Peter\" results in:\n\
-          \"2013-05-09T16.17_img_00042" + TEXT_SEPARATOR + "Peter -- fun.jpeg\"\n\
+          \"2013-05-09T16.17_img_00042" + DEFAULT_TEXT_SEPARATOR + "Peter -- fun.jpeg\"\n\
 \n\
 \n\
 :copyright: (c) 2013 or later by Karl Voit <tools@Karl-Voit.at>\n\
@@ -86,6 +86,11 @@ parser.add_option("-p", "--prepend", dest="prepend", action="store_true",
 
 parser.add_option("--smart-prepend", dest="smartprepend", action="store_true",
                   help="Like \"--prepend\" but do respect date/time-stamps: insert new text between \"YYYY-MM-DD(Thh.mm(.ss))\" and rest")
+
+parser.add_option("--separator",
+                  metavar="separator",
+                  default=" ",
+                  help='Specify the text separator (default: "' + DEFAULT_TEXT_SEPARATOR + '").')
 
 parser.add_option("-d", "--dryrun", dest="dryrun", action="store_true",
                   help="enable dryrun mode: just simulate what would happen, do not modify file(s)")
@@ -304,18 +309,18 @@ def handle_file(filename, text, dryrun):
 
     try:
         if options.prepend:
-            new_filename = os.path.join(os.path.dirname(filename), text + TEXT_SEPARATOR + old_basename + tags_with_extension)
+            new_filename = os.path.join(os.path.dirname(filename), text + DEFAULT_TEXT_SEPARATOR + old_basename + tags_with_extension)
         elif options.smartprepend:
             match = re.match(WITHTIME_AND_SECONDS_PATTERN, filename)
             if not match:
                 logging.debug('can\'t find a date/time-stamp, doing a simple prepend')
-                new_filename = os.path.join(os.path.dirname(filename), text + TEXT_SEPARATOR + old_basename + tags_with_extension)
+                new_filename = os.path.join(os.path.dirname(filename), text + DEFAULT_TEXT_SEPARATOR + old_basename + tags_with_extension)
             else:
                 logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
-                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + TEXT_SEPARATOR + text + TEXT_SEPARATOR + match.group(len(match.groups())))
+                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + DEFAULT_TEXT_SEPARATOR + text + DEFAULT_TEXT_SEPARATOR + match.group(len(match.groups())))
                 #import pdb; pdb.set_trace()
         else:
-            new_filename = os.path.join(os.path.dirname(filename), old_basename + TEXT_SEPARATOR + text + tags_with_extension)
+            new_filename = os.path.join(os.path.dirname(filename), old_basename + DEFAULT_TEXT_SEPARATOR + text + tags_with_extension)
     except:
         logging.error("Error while trying to build new filename: " + str(sys.exc_info()[0]))
         num_errors += 1
