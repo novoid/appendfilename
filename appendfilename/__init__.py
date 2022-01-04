@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2022-01-01 11:25:53 vk>"
+PROG_VERSION = u"Time-stamp: <2022-01-04 17:25:15 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -317,8 +317,7 @@ def handle_file(filename, text, dryrun):
                 new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
             else:
                 logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
-                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + separator() + text + separator + match.group(len(match.groups())))
-                #import pdb; pdb.set_trace()
+                new_filename = os.path.join(os.path.dirname(filename), match.group(1) + separator() + text + separator() + match.group(len(match.groups())))
         else:
             new_filename = os.path.join(os.path.dirname(filename), old_basename + separator() + text + tags_with_extension)
     except:
