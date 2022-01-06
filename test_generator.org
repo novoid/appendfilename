@@ -1,0 +1,329 @@
+# name:    test_generator.org
+# author:  nbehrnd@yahoo.com
+# date:    2022-01-05 (YYYY-MM-DD)
+# edit:    2022-01-06 (YYYY-MM-DD)
+# license: GPL3, 2022.
+# Export the tangled files with C-c C-v t
+
+#+PROPERTY: header-args :tangle yes
+
+* Intent
+
+  The application =appendfilename= by Karl Voit /et al./ ([[https://github.com/novoid/appendfilename][source]])
+  allows the programmatic addition of user defined strings to one or
+  multiple already existing file names (e.g., add =travel= to file
+  =example.jpg= to yield =example_travel.jpg=).  By the command =C-c
+  C-v t=, Emacs may use the present =.org= file to (re)generate a
+  tangled test script, file =test_appendfilename.py= for a
+  programmatic testing by [[https://docs.pytest.org/en/latest/][pytest]].  (Though =pytest= is not part of the
+  Python standard library, it may be obtained easily e.g., from [[https://pypi.org/project/pytest/][PyPi]].)
+  Optionally, the testing may be run by the equally tangled
+  =Makefile=.
+
+* Deployment
+
+  On a computer with Python 3 only, the recommended call on the CLI to
+  run the tests is either one of the following instructions (you might
+  need to add the executable bit):
+
+  #+begin_src bash :tangle no
+  python pytest -v test_appendfilename.py
+  ./Makefile
+  #+end_src
+
+  In case the computer you use equally includes an installation of
+  legacy Python 2 side-by-side to Python 3, you must explicitly call
+  for the later branch of the two.  Depending on your OS, this
+  requires an adjustment of the command issued.  In Linux Debian
+  12/bookworm, branch testing, for example,
+
+  #+begin_src bash :tangle no
+  python3 pytest-3 -v test_appendfilename.py
+  #+end_src
+
+* Setup of Emacs
+
+  The edit of this =.org= file in Emacs and the subsequent export
+  (tangle) of the files are affected by Emacs' own parameters (e.g.,
+  the indentation in Python).  It is recommended to access this file
+  with Emacs in a session started by =emacs -q test_generator.org &=
+  and to evaluate the following block by =C-c C-c=; this explicitly
+  adjusts a few basic settings, but does not permanently overwrite an
+  already existing personalized Emacs configuration.
+
+  Most of these instructions are elements of Hendrik Suenkler's
+  annotated Emacs configuration ([[https://www.suenkler.info/notes/emacs-config/][blog post]]) which are reused with his
+  permission.
+
+  #+begin_src emacs-lisp :tangle no
+;; support these languages at all:
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (org . t)
+   (shell . t)
+   (python . t)))
+
+;; enable syntax highlighting:
+(setq org-src-fontify-natively t)
+
+;; adjust indentations, set tabs as explicit 4 spaces:
+(setq-default indent-tabs-mode nil)
+(setq default-tab-width 4)
+
+(setq custom-tab-width 4)
+(setq-default python-indent-offset custom-tab-width)
+
+(setq org-edit-src-content-indentation 0)
+(setq org-src-tab-acts-natively t)
+(setq org-src-preserve-indentation t)
+
+;; some comfort functions Suenkler mentions:
+(delete-selection-mode 1)
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(show-paren-mode 1)
+(setq show-paren-style 'parenthesis)
+
+(column-number-mode nil)
+
+(setq org-src-fontify-natively t)
+  #+end_src
+
+  #+RESULTS:
+  : t
+
+  If the previous block was evaluated as .TRUE. (=t=), test script and
+  Makefile may be tangled right now by =C-c C-v t=.  After closing
+  this =.org= file, deploy them as indicated earlier.
+
+* Building the tests
+
+** Building of the Makefile
+
+   The setup is for GNU Make 4.3 as provided e.g., by Linux Debian 12
+   (bookworm), branch testing.  Note, the Makefile tangled is a mere
+   convenient moderator for =test_appendfilename.py=; the eventual
+   testing of appendfilename's action does not depend on this
+   Makefile.
+
+    #+BEGIN_SRC makefile :tangle Makefile
+# GNU Make file for the automation of pytest for appendfilename.
+#
+# While the test script is written for Python 3.9.2, you might need to
+# adjust the following instruction once in case your OS includes
+# pytest for legacy Python 2 side by side to Python 3, or only hosts
+# pytest for Python 3.  The tests in script test_appendfilename.py are
+# set up to work with pytest for Python 3; dependent on your
+# installation, which may be named pytest-3, or (again) pytest.
+#
+# Put this file like test_appendfilename.py in the root folder of
+# appendfilename fetched from PyPi or GitHub.  Then run
+#
+# chmod +x *
+# make ./Makefile
+#
+# to run the tests.  If you want pytest to exit the test sequence
+# right after the first test failing, use the -x flag to the
+# instructions on the CLI in addition to the verbosity flag to (-v).
+
+# pytest -v test_appendfilename.py # only pytest for Python 3 is present
+pytest-3 -v test_appendfilename.py   # pytest if Python 2 and Python 3 coexist
+    #+end_src
+
+** Building a pytest.ini
+
+   This file defines markers to assign tests into groups.  This allows to run
+   =pytest= on a subset rather than all tests (which is set up as the default).
+   E.g., in presence of =pytest.ini=, a call like
+
+   #+begin_src bash  :tangle no
+pytest-3 test_appendfilename.py -v -m "default"
+   #+end_src
+
+   constrains the tester's action to all tests labeled as "default" as about the
+   default position where the text string is added.  At present, tests are
+   grouped as
+   + default; appendfilename's default string insertions
+   + prepend; corresponding to appendfilename's optional -p/--prepend flag, and
+   + smart; corresponding to appendfilename's optional --smart-prepend flag
+     
+   It is possible to run one, two, or all three groups in one run of pytest.
+   E.g., a simultaneous check of tests belonging to either default, or prepend
+   optional requires the instruction
+
+   #+begin_src bash :tangle no
+pytest-3 test_appendfilename.py -m "default and prepend" -v
+   #+end_src
+
+   #+begin_src python :tangle pytest.ini
+[pytest]
+markers =
+    default:  check the default insertion position of appendfile
+    prepend:  check the prepend insertion position of appendfile
+    smart:    check the smart-prepend insertion position of appendfile
+   #+end_src
+
+
+** Building the test script
+
+*** header section
+    #+BEGIN_SRC python :tangle test_appendfilename.py
+#!/bin/usr/env python3
+
+# name:    test_appendfilename.py
+# author:  nbehrnd@yahoo.com
+# license: GPL v3, 2022.
+# date:    2022-01-05 (YYYY-MM-DD)
+# edit:
+#
+"""Test pad for functions by appendfilename with pytest.
+
+Written for Python 3.9.9 and pytest 6.2.4 for Python 3 as provided by
+Linux Debian 12/bookworm, branch testing, this is a programmatic check
+of functions offered by appendfilename.  Deposit this script in the root of
+the folder fetched and unzipped from PyPi or GitHub.  If your system
+includes both legacy Python 2 and Python 3, pytest for Python 3 likely
+is named pytest-3; otherwise only pytest.  Thus, adjust your input on
+the CLI accordingly when running either one of
+
+pytest -v test_appendfilename.py
+pytest-3 -v test_appendfilename.py
+
+These instruction initiate a verbose testing (flag -v) reported back to the
+CLI.re will be a verbose report to the CLI The script either stops when one of
+the tests fail (flag -x), or after completion of the test sequence.  In both
+cases, the progress of the ongoing tests is reported to the CLI (flag -v)."""
+import os
+from subprocess import getstatusoutput, getoutput
+
+import pytest
+
+PROGRAM = str("./appendfilename/__init__.py")
+    #+end_src
+
+*** appendfilename, default position
+    
+    Departing with file =test.txt=, appendfile's addition of =example= should
+    yield =test example.txt=.  Testing so far skips the addition of string
+    containing spaces, as well as the implicit spacing.
+
+    #+begin_src python :tangle test_appendfilename.py
+@pytest.mark.default
+@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
+                                  "2021-12-31T18.48.22_test.txt"])
+@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
+                                  "--text book", "--text book_shelf"])
+@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
+                                  "=", "-"])
+def test_pattern_s1(arg1, arg2, arg3):
+    """Check addition just ahead the file extension.
+
+    arg1   the test files to process
+    arg2   the text string to be added
+    arg3   the explicitly defined text separator (except [a-zA-Z])"""
+
+    # extract the newly added text information:
+    text_elements = arg2.split(" ")[1:]
+    text = str(" ".join(text_elements))
+
+    with open(arg1, mode="w") as newfile:
+        newfile.write("This is a test file for test_appendfilename.")
+
+    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3}")
+
+    new_filename = "".join([arg1[:-4], arg3, text, str(".txt")])
+    assert os.path.isfile(new_filename)
+
+    os.remove(new_filename)
+    assert os.path.isfile(new_filename) is False
+    #+end_src
+
+*** appendfilename, prepend position
+    
+    Departing with file =test.txt=, appendfile's addition of =example=
+    should yield =example test.txt=.  Testing so far skips the
+    addition of string containing spaces, as well as the implicit
+    spacing.
+
+    #+begin_src python :tangle test_appendfilename.py
+@pytest.mark.prepend
+@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
+                                  "2021-12-31T18.48.22_test.txt"])
+@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
+                                  "--text book", "--text book_shelf"])
+@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
+                                  "=", "-"])
+@pytest.mark.parametrize("arg4", ["-p", "--prepend"])
+def test_pattern_s2(arg1, arg2, arg3, arg4):
+    """Check addition just ahead the file extension.
+
+    arg1   the test files to process
+    arg2   the text string to be added
+    arg3   the explicitly defined text separator (except [a-zA-Z])
+    arg4   use either of two forms of the prepend flag."""
+
+    # extract the newly added text information:
+    text_elements = arg2.split(" ")[1:]
+    text = str(" ".join(text_elements))
+
+    with open(arg1, mode="w") as newfile:
+        newfile.write("This is a test file for test_appendfilename.")
+
+    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} {arg4}")
+
+    new_filename = "".join([text, arg3, arg1])
+    assert os.path.isfile(new_filename)
+
+    os.remove(new_filename)
+    assert os.path.isfile(new_filename) is False
+    #+end_src
+
+*** appendfilename, smart prepend position
+    
+    Departing with file =2021-12-31T18.48.22_test.txt=, appendfile's
+    addition of =example= should yield =2021-12-31T18.48.22_test
+    example.txt=.  Testing so far skips the addition of string
+    containing spaces, as well as the implicit spacing.
+
+    This constrained test instance is known to successfully pass for
+    file =2021-12-31T18.48.22_test.txt=.  By subsequent inspection of
+    the directory in question, =test.txt= is processed correctly (to
+    yield =book test.txt=), the false positive alert by pytest could
+    be resolved by working on the test function.  File
+    =2021-12-31.txt= however /indeed is erroneous/; as by
+    <2022-01-06 Thu>, it yields =2021-12-31 book txt= in lieu of
+    =2021-12-31 book.txt=.
+
+    #+begin_src python :tangle test_appendfilename.py
+@pytest.mark.smart
+@pytest.mark.parametrize("arg1", ["2021-12-31T18.48.22_test.txt", "2021-12-31.txt", "test.txt"])
+@pytest.mark.parametrize("arg2", ["-t book"])  #, "-t book_shelf",
+                                  # "--text book", "--text book_shelf"])
+@pytest.mark.parametrize("arg3", [" "])  #, "!", "@", "#", "$", "%", "*", "_", "+",
+                                  # "=", "-"])
+def test_pattern_s3(arg1, arg2, arg3):
+    """Check addition retaining time stamp on leading position.
+
+    arg1   the test files to process
+    arg2   the text string to be added
+    arg3   the explicitly defined text separator (except [a-zA-Z])."""
+
+    # extract the newly added text information:
+    text_elements = arg2.split(" ")[1:]
+    text = str(" ".join(text_elements))
+
+    with open(arg1, mode="w") as newfile:
+        newfile.write("This is a test file for test_appendfilename.")
+
+    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} --smart-prepend")
+
+    # for now, and only valid for the pattern --withtime:
+    new_filename = "2021-12-31T18.48.22 book test.txt"
+
+    assert os.path.isfile(new_filename) 
+
+    os.remove(new_filename)
+    assert os.path.isfile(new_filename) is False
+    #+end_src
+
