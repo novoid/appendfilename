@@ -175,7 +175,7 @@ markers =
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:
+# edit:    2022-01-07 (YYYY-MM-DD)
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -194,6 +194,8 @@ These instruction initiate a verbose testing (flag -v) reported back to the
 CLI.re will be a verbose report to the CLI The script either stops when one of
 the tests fail (flag -x), or after completion of the test sequence.  In both
 cases, the progress of the ongoing tests is reported to the CLI (flag -v)."""
+
+import re
 import os
 from subprocess import getstatusoutput, getoutput
 
@@ -281,28 +283,20 @@ def test_pattern_s2(arg1, arg2, arg3, arg4):
 
 *** appendfilename, smart prepend position
     
-    Departing with file =2021-12-31T18.48.22_test.txt=, appendfile's
-    addition of =example= should yield =2021-12-31T18.48.22_test
-    example.txt=.  Testing so far skips the addition of string
-    containing spaces, as well as the implicit spacing.
-
-    This constrained test instance is known to successfully pass for
-    file =2021-12-31T18.48.22_test.txt=.  By subsequent inspection of
-    the directory in question, =test.txt= is processed correctly (to
-    yield =book test.txt=), the false positive alert by pytest could
-    be resolved by working on the test function.  File
-    =2021-12-31.txt= however /indeed is erroneous/; as by
-    <2022-01-06 Thu>, it yields =2021-12-31 book txt= in lieu of
-    =2021-12-31 book.txt=.
+    If a file has a leading time stamp like =YYYY-MM-DD_=, or
+    =YYYY-MM-DDTHH:MM:SS_=, than a smart addition of the text to the
+    file name should follow this.  So far, the tests recognize only
+    these two pattern issued by =date2name=, or the absence of such.
 
     #+begin_src python :tangle test_appendfilename.py
 @pytest.mark.smart
-@pytest.mark.parametrize("arg1", ["2021-12-31T18.48.22_test.txt", "2021-12-31.txt", "test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book"])  #, "-t book_shelf",
-                                  # "--text book", "--text book_shelf"])
-@pytest.mark.parametrize("arg3", [" "])  #, "!", "@", "#", "$", "%", "*", "_", "+",
-                                  # "=", "-"])
-def test_pattern_s3(arg1, arg2, arg3):
+@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
+                                  "2021-12-31T18.48.22_test.txt"])
+@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
+                                  "--text book", "--text book_shelf"])
+@pytest.mark.parametrize("arg3", [" " , "#", "!", "@", "#", "$", "%", "*", "_", "+",
+                                  "=", "-"])
+def test_pattern_s3_02(arg1, arg2, arg3):
     """Check addition retaining time stamp on leading position.
 
     arg1   the test files to process
@@ -317,13 +311,48 @@ def test_pattern_s3(arg1, arg2, arg3):
         newfile.write("This is a test file for test_appendfilename.")
 
     test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} --smart-prepend")
+    
+    # analysis section:
+    old_filename = str(arg1)
 
-    # for now, and only valid for the pattern --withtime:
-    new_filename = "2021-12-31T18.48.22 book test.txt"
+    if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
+        # if (running date2name in default mode) then .true.
+        time_stamp = old_filename[:10]
+        time_stamp_separator = old_filename[10]
+        file_extension = old_filename.split(".")[-1]
 
-    assert os.path.isfile(new_filename) 
+        old_filename_no_timestamp = old_filename[11:]
+        stem_elements = old_filename_no_timestamp.split(".")[:-1]
+        stem = ".".join(stem_elements)
 
-    os.remove(new_filename)
-    assert os.path.isfile(new_filename) is False
+        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
+        assert os.path.isfile(new_filename)
+
+        os.remove(new_filename)
+        assert os.path.isfile(new_filename) is False
+
+    elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
+        # if (running date2name --withtime) then .true.
+        time_stamp = old_filename[:19]
+        time_stamp_separator = old_filename[19]
+        file_extension = old_filename.split(".")[-1]
+
+        old_filename_no_timestamp = old_filename[20:]
+        stem_elements = old_filename_no_timestamp.split(".")[:-1]
+        stem = ".".join(stem_elements)
+
+        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
+        assert os.path.isfile(new_filename)
+
+        os.remove(new_filename)
+        assert os.path.isfile(new_filename) is False
+
+    else:
+        # within the scope set, a file which did not pass date2name earlier
+        new_filename = "".join([text, arg3, old_filename])
+        assert os.path.isfile(new_filename)
+
+        os.remove(new_filename)
+        assert os.path.isfile(new_filename) is False
     #+end_src
 
