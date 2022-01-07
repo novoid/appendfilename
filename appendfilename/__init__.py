@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2022-01-07 17:03:35 vk>"
+PROG_VERSION = u"Time-stamp: <2022-01-07 17:10:27 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -324,7 +324,12 @@ def handle_file(filename, text, dryrun):
                 new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
             else:
                 logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
+                logging.debug('options.smartprepend is set with |' + str(os.path.dirname(filename)) + '|' +
+                              str(match.group(1)) + '|' + str(match.group(len(match.groups()))) + '|')
+                logging.debug('options.smartprepend is set with |' + str(type(os.path.dirname(filename))) + '|' +
+                              str(type(match.group(1))) + '|' + str(type(match.group(len(match.groups())))) + '|')
                 new_filename = os.path.join(os.path.dirname(filename), match.group(1) + separator() + text + separator() + match.group(len(match.groups())))
+                logging.debug('new_filename is now: ' + new_filename)
         else:
             new_filename = os.path.join(os.path.dirname(filename), old_basename + separator() + text + tags_with_extension)
     except:
