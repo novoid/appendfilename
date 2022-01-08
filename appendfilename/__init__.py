@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2022-01-04 17:25:15 vk>"
+PROG_VERSION = u"Time-stamp: <2022-01-07 17:10:27 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -288,6 +288,7 @@ def handle_file(filename, text, dryrun):
 
     assert(isinstance(filename, str))
     num_errors = 0
+    new_filename = ''
 
     if os.path.isdir(filename):
         logging.warning("Skipping directory \"%s\" because this tool only processes file names." % filename)
@@ -309,15 +310,26 @@ def handle_file(filename, text, dryrun):
 
     try:
         if options.prepend:
+            logging.debug('options.prepend is set with |' + str(os.path.dirname(filename)) + '|' +
+                          str(text) + '|' + str(separator()) + '|' + str(old_basename) + '|' + str(tags_with_extension))
             new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
         elif options.smartprepend:
             match = re.match(WITHTIME_AND_SECONDS_PATTERN, filename)
+            logging.debug('options.smartprepend is set with |' + str(os.path.dirname(filename)) + '|' +
+                          str(text) + '|' + str(separator()) + '|' + str(old_basename) + '|' + str(tags_with_extension))
+            logging.debug('options.smartprepend is set with |' + str(type(os.path.dirname(filename))) + '|' +
+                          str(type(text)) + '|' + str(type(separator())) + '|' + str(type(old_basename)) + '|' + str(type(tags_with_extension)))
             if not match:
                 logging.debug('can\'t find a date/time-stamp, doing a simple prepend')
                 new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
             else:
                 logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
+                logging.debug('options.smartprepend is set with |' + str(os.path.dirname(filename)) + '|' +
+                              str(match.group(1)) + '|' + str(match.group(len(match.groups()))) + '|')
+                logging.debug('options.smartprepend is set with |' + str(type(os.path.dirname(filename))) + '|' +
+                              str(type(match.group(1))) + '|' + str(type(match.group(len(match.groups())))) + '|')
                 new_filename = os.path.join(os.path.dirname(filename), match.group(1) + separator() + text + separator() + match.group(len(match.groups())))
+                logging.debug('new_filename is now: ' + new_filename)
         else:
             new_filename = os.path.join(os.path.dirname(filename), old_basename + separator() + text + tags_with_extension)
     except:
