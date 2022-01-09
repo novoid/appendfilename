@@ -4,7 +4,7 @@
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    2022-01-07 (YYYY-MM-DD)
+# edit:    2022-01-09 (YYYY-MM-DD)
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -34,7 +34,9 @@ PROGRAM = str("./appendfilename/__init__.py")
 
 @pytest.mark.default
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt",
+                                  "20211231_test.txt", "2012-12_test.txt",
+                                  "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
@@ -63,7 +65,9 @@ def test_pattern_s1(arg1, arg2, arg3):
 
 @pytest.mark.prepend
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt",
+                                  "20211231_test.txt", "2012-12_test.txt",
+                                  "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
