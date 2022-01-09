@@ -319,29 +319,23 @@ def test_pattern_s3_02(arg1, arg2, arg3):
     # analysis section:
     old_filename = str(arg1)
 
-    if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
-        # if (running date2name in default mode) then .true.
-        time_stamp = old_filename[:10]
-        time_stamp_separator = old_filename[10]
-        file_extension = old_filename.split(".")[-1]
+    if (re.search("^\d{4}-[012]\d-[0-3]\d_", old_filename) or
+        re.search('^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d_', old_filename)):
 
-        old_filename_no_timestamp = old_filename[11:]
-        stem_elements = old_filename_no_timestamp.split(".")[:-1]
-        stem = ".".join(stem_elements)
-
-        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
-        assert os.path.isfile(new_filename)
-
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
-
-    elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
-        # if (running date2name --withtime) then .true.
-        time_stamp = old_filename[:19]
-        time_stamp_separator = old_filename[19]
-        file_extension = old_filename.split(".")[-1]
-
-        old_filename_no_timestamp = old_filename[20:]
+        if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
+            # if (running date2name in default mode) then .true.
+            time_stamp = old_filename[:10]
+            time_stamp_separator = old_filename[10]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[11:]
+            
+        elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
+            # if (running date2name --withtime) then .true.
+            time_stamp = old_filename[:19]
+            time_stamp_separator = old_filename[19]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[20:]
+            
         stem_elements = old_filename_no_timestamp.split(".")[:-1]
         stem = ".".join(stem_elements)
 
