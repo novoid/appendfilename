@@ -4,7 +4,7 @@
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    2022-01-07 (YYYY-MM-DD)
+# edit:    2022-01-09 (YYYY-MM-DD)
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -34,7 +34,9 @@ PROGRAM = str("./appendfilename/__init__.py")
 
 @pytest.mark.default
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt",
+                                  "20211231_test.txt", "2012-12_test.txt",
+                                  "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
@@ -63,7 +65,9 @@ def test_pattern_s1(arg1, arg2, arg3):
 
 @pytest.mark.prepend
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt",
+                                  "20211231_test.txt", "2012-12_test.txt",
+                                  "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
@@ -94,7 +98,8 @@ def test_pattern_s2(arg1, arg2, arg3, arg4):
 
 @pytest.mark.smart
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt", "20211231_test.txt",
+                                  "2021-12_test.txt", "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" " , "#", "!", "@", "#", "$", "%", "*", "_", "+",
@@ -114,33 +119,57 @@ def test_pattern_s3_02(arg1, arg2, arg3):
         newfile.write("This is a test file for test_appendfilename.")
 
     test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} --smart-prepend")
-    
+
     # analysis section:
     old_filename = str(arg1)
 
-    if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
-        # if (running date2name in default mode) then .true.
-        time_stamp = old_filename[:10]
-        time_stamp_separator = old_filename[10]
-        file_extension = old_filename.split(".")[-1]
+    # test pattern issued by date2name vs. other pattern
+    # default (YYYY-MM-DD)
+    # --withtime (YYYY-MM-DDTHH.MM.SS)
+    # --compact (YYYYMMDD)
+    # --month (YYYY-MM)
+    # --short (YYMMDD)
+    if (re.search("^\d{4}-[012]\d-[0-3]\d_", old_filename) or
+        re.search('^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d_', old_filename) or
+        re.search("^\d{4}[012]\d[0-3]\d_", old_filename) or
+        re.search("^\d{4}-[012]\d_", old_filename) or
+        re.search("^\d{2}[012]\d[0-3]\d_", old_filename)):
 
-        old_filename_no_timestamp = old_filename[11:]
-        stem_elements = old_filename_no_timestamp.split(".")[:-1]
-        stem = ".".join(stem_elements)
+        if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
+            # if (running date2name in default mode) then .true.
+            time_stamp = old_filename[:10]
+            time_stamp_separator = old_filename[10]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[11:]
 
-        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
-        assert os.path.isfile(new_filename)
+        elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
+            # if (running date2name --withtime) then .true.
+            time_stamp = old_filename[:19]
+            time_stamp_separator = old_filename[19]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[20:]
 
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
+        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
+            # if (running date2name --compact) then .true.
+            time_stamp = old_filename[:8]
+            time_stamp_separator = old_filename[8]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[9:]
 
-    elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
-        # if (running date2name --withtime) then .true.
-        time_stamp = old_filename[:19]
-        time_stamp_separator = old_filename[19]
-        file_extension = old_filename.split(".")[-1]
+        elif re.search("^\d{4}-\d{2}_", old_filename):
+            # if (running date2name --month) then .true.
+            time_stamp = old_filename[:7]
+            time_stamp_separator = old_filename[7]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[8:]
 
-        old_filename_no_timestamp = old_filename[20:]
+        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
+            # if (running date2name --short) then .true.
+            time_stamp = old_filename[:6]
+            time_stamp_separator = old_filename[6]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[7:]
+
         stem_elements = old_filename_no_timestamp.split(".")[:-1]
         stem = ".".join(stem_elements)
 
