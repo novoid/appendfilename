@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-PROG_VERSION = u"Time-stamp: <2022-01-07 17:10:27 vk>"
+PROG_VERSION = u"Time-stamp: <2024-08-29 19:02:13 vk>"
 
 # TODO:
 # * fix parts marked with «FIXXME»
@@ -75,6 +75,8 @@ FILENAME_COMPONENT_LOWERCASE_BLACKLIST = ['img', 'eine', 'einem', 'eines', 'fuer
 
 # initial CV with strings that are provided for tab completion in any case (whitelist)
 INITIAL_CONTROLLED_VOCABULARY = ['Karl', 'Graz', 'LaTeX', 'specialL', 'specialP']
+
+DEBUG_SEPARATOR = '★'
 
 parser = OptionParser(usage=USAGE)
 
@@ -310,24 +312,25 @@ def handle_file(filename, text, dryrun):
 
     try:
         if options.prepend:
-            logging.debug('options.prepend is set with |' + str(os.path.dirname(filename)) + '|' +
-                          str(text) + '|' + str(separator()) + '|' + str(old_basename) + '|' + str(tags_with_extension))
+            logging.debug('options.prepend is set with ' + DEBUG_SEPARATOR + str(os.path.dirname(filename)) + DEBUG_SEPARATOR +
+                          str(text) + DEBUG_SEPARATOR + str(separator()) + DEBUG_SEPARATOR +
+                          str(old_basename) + DEBUG_SEPARATOR + str(tags_with_extension))
             new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
         elif options.smartprepend:
             match = re.match(WITHTIME_AND_SECONDS_PATTERN, filename)
-            logging.debug('options.smartprepend is set with |' + str(os.path.dirname(filename)) + '|' +
-                          str(text) + '|' + str(separator()) + '|' + str(old_basename) + '|' + str(tags_with_extension))
-            logging.debug('options.smartprepend is set with |' + str(type(os.path.dirname(filename))) + '|' +
-                          str(type(text)) + '|' + str(type(separator())) + '|' + str(type(old_basename)) + '|' + str(type(tags_with_extension)))
+            logging.debug('options.smartprepend is set with ' + DEBUG_SEPARATOR + str(os.path.dirname(filename)) + DEBUG_SEPARATOR +
+                          str(text) + DEBUG_SEPARATOR + str(separator()) + DEBUG_SEPARATOR + str(old_basename) + DEBUG_SEPARATOR + str(tags_with_extension))
+            logging.debug('options.smartprepend is set with ' + DEBUG_SEPARATOR + str(type(os.path.dirname(filename))) + DEBUG_SEPARATOR +
+                          str(type(text)) + DEBUG_SEPARATOR + str(type(separator())) + DEBUG_SEPARATOR + str(type(old_basename)) + DEBUG_SEPARATOR + str(type(tags_with_extension)))
             if not match:
                 logging.debug('can\'t find a date/time-stamp, doing a simple prepend')
                 new_filename = os.path.join(os.path.dirname(filename), text + separator() + old_basename + tags_with_extension)
             else:
                 logging.debug('date/time-stamp found, insert text between date/time-stamp and rest')
-                logging.debug('options.smartprepend is set with |' + str(os.path.dirname(filename)) + '|' +
-                              str(match.group(1)) + '|' + str(match.group(len(match.groups()))) + '|')
-                logging.debug('options.smartprepend is set with |' + str(type(os.path.dirname(filename))) + '|' +
-                              str(type(match.group(1))) + '|' + str(type(match.group(len(match.groups())))) + '|')
+                logging.debug('options.smartprepend is set with ' + DEBUG_SEPARATOR + str(os.path.dirname(filename)) + DEBUG_SEPARATOR +
+                              str(match.group(1)) + DEBUG_SEPARATOR + str(match.group(len(match.groups()))) + DEBUG_SEPARATOR)
+                logging.debug('options.smartprepend is set with ' + DEBUG_SEPARATOR + str(type(os.path.dirname(filename))) + DEBUG_SEPARATOR +
+                              str(type(match.group(1))) + DEBUG_SEPARATOR + str(type(match.group(len(match.groups())))) + DEBUG_SEPARATOR)
                 new_filename = os.path.join(os.path.dirname(filename), match.group(1) + separator() + text + separator() + match.group(len(match.groups())))
                 logging.debug('new_filename is now: ' + new_filename)
         else:
