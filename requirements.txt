@@ -1,1 +1,1 @@
-pyreadline
+pyreadline3
