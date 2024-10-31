@@ -3,7 +3,7 @@ name: CI_pytest_appendfilename
 # name    : pytest.yml
 # purpose : regularly run pytest on appendfilename
 # date    : [2024-10-31 Thu]
-# edit    :
+# edit    : [2024-10-31 Thu]
 
 on:
   push:
@@ -17,8 +17,46 @@ on:
     # - cron: "0 0 1 * *"  # once each 1st of a month, at 00:00 UTC (cf. https://crontab.guru/)
 
 jobs:
-  test-ubuntu:
+  test-ubuntu-2404:
     runs-on: ubuntu-24.04
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v4
+        # by [2024-10-23 Wed], this version possibly will be considered "old", cf.
+        # https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies with PyPI
+        run: pip install -r requirements.txt
+
+      - name: run the check by pytest
+        run: python -m pytest
+
+  test-windows-2022:
+    runs-on: windows-2022
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v4
+        # by [2024-10-23 Wed], this version possibly will be considered "old", cf.
+        # https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies with PyPI
+        run: pip install -r requirements.txt
+
+      - name: run the check by pytest
+        run: python -m pytest
+
+  test-macos-14
+    runs-on: macos-14
     timeout-minutes: 2
 
     steps:
