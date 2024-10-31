@@ -22,24 +22,24 @@
 
 * Deployment
 
-  On a computer with Python 3 only, the recommended call on the CLI to
-  run the tests is either one of the following instructions (you might
-  need to add the executable bit):
+  The programmatic tests are set up for pytest for Python 3.  It
+  however depends on your installation (and in case of Linux, the
+  authors of your Linux distribution ([[https://github.com/pytest-dev/pytest/discussions/9481][reference]])) if this utility may
+  be started by =pytest= (e.g., the pattern in pytest's manual), or by
+  =pytest-3= by either one of the pattern below:
 
   #+begin_src bash :tangle no
-  python pytest -v test_appendfilename.py
-  ./Makefile
+pytest -v test_appendfilename.py
+pytest-3 -v test_appendfilename.py
   #+end_src
 
-  In case the computer you use equally includes an installation of
-  legacy Python 2 side-by-side to Python 3, you must explicitly call
-  for the later branch of the two.  Depending on your OS, this
-  requires an adjustment of the command issued.  In Linux Debian
-  12/bookworm, branch testing, for example,
+  As of writing, the later pattern is the to be used e.g., in Linux
+  Debian 12/bookworm (branch testing) to discern pytest (for
+  contemporary Python 3) from pytest (for legacy Python 2).
 
-  #+begin_src bash :tangle no
-  python3 pytest-3 -v test_appendfilename.py
-  #+end_src
+  The =Makefile= this =org= file provides for convenience running
+  these tests assumes the later syntax pattern.  (It might be
+  necessary to provide the executable bit to activate the Makefile.)
 
 * Setup of Emacs
 
@@ -56,38 +56,38 @@
   permission.
 
   #+begin_src emacs-lisp :tangle no
-;; support these languages at all:
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (org . t)
-   (shell . t)
-   (python . t)))
+    ;; support these languages at all:
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((emacs-lisp . t)
+       (org . t)
+       (shell . t)
+       (python . t)))
 
-;; enable syntax highlighting:
-(setq org-src-fontify-natively t)
+    ;; enable syntax highlighting:
+    (setq org-src-fontify-natively t)
 
-;; adjust indentations, set tabs as explicit 4 spaces:
-(setq-default indent-tabs-mode nil)
-(setq default-tab-width 4)
+    ;; adjust indentations, set tabs as explicit 4 spaces:
+    (setq-default indent-tabs-mode nil)
+    (setq default-tab-width 4)
 
-(setq custom-tab-width 4)
-(setq-default python-indent-offset custom-tab-width)
+    (setq custom-tab-width 4)
+    (setq-default python-indent-offset custom-tab-width)
 
-(setq org-edit-src-content-indentation 0)
-(setq org-src-tab-acts-natively t)
-(setq org-src-preserve-indentation t)
+    (setq org-edit-src-content-indentation 0)
+    (setq org-src-tab-acts-natively t)
+    (setq org-src-preserve-indentation t)
 
-;; some comfort functions Suenkler mentions:
-(delete-selection-mode 1)
-(defalias 'yes-or-no-p 'y-or-n-p)
+    ;; some comfort functions Suenkler mentions:
+    (delete-selection-mode 1)
+    (defalias 'yes-or-no-p 'y-or-n-p)
 
-(show-paren-mode 1)
-(setq show-paren-style 'parenthesis)
+    (show-paren-mode 1)
+    (setq show-paren-style 'parenthesis)
 
-(column-number-mode nil)
+    (column-number-mode nil)
 
-(setq org-src-fontify-natively t)
+    (setq org-src-fontify-natively t)
   #+end_src
 
   #+RESULTS:
@@ -108,14 +108,14 @@
    Makefile.
 
     #+BEGIN_SRC makefile :tangle Makefile
-# GNU Make file for the automation of pytest for appendfilename.
+# GNU Make file for the automation of pytest for appendfilename
 #
-# While the test script is written for Python 3.9.2, you might need to
-# adjust the following instruction once in case your OS includes
-# pytest for legacy Python 2 side by side to Python 3, or only hosts
-# pytest for Python 3.  The tests in script test_appendfilename.py are
-# set up to work with pytest for Python 3; dependent on your
-# installation, which may be named pytest-3, or (again) pytest.
+# While the test script is written for Python 3.9.2, it depends on
+# your installation of pytest (and in case of Linux, the authors of
+# your distribution) if pytest for Python 3 is invoked either by
+# pytest, or pytest-3.  In some distributions, pytest actually may
+# invoke pyest for legacy Python 2; the tests in test_date2name.py
+# however are incompatible to this.
 #
 # Put this file like test_appendfilename.py in the root folder of
 # appendfilename fetched from PyPi or GitHub.  Then run
@@ -127,8 +127,8 @@
 # right after the first test failing, use the -x flag to the
 # instructions on the CLI in addition to the verbosity flag to (-v).
 
-# pytest -v test_appendfilename.py # only pytest for Python 3 is present
-pytest-3 -v test_appendfilename.py   # pytest if Python 2 and Python 3 coexist
+# pytest -v test_appendfilename.py     # the pattern by pytest's manual
+pytest-3 -v test_appendfilename.py   # the alternative pattern (e.g., Debian 12)
     #+end_src
 
 ** Building a pytest.ini
@@ -259,7 +259,9 @@ def test_pattern_s1(arg1, arg2, arg3):
     #+begin_src python :tangle no
 @pytest.mark.prepend
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt",
+                                  "20211231_test.txt", "2012-12_test.txt",
+                                  "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
@@ -299,7 +301,8 @@ def test_pattern_s2(arg1, arg2, arg3, arg4):
     #+begin_src python :tangle no
 @pytest.mark.smart
 @pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
+                                  "2021-12-31T18.48.22_test.txt", "20211231_test.txt",
+                                  "2021-12_test.txt", "211231_test.txt"])
 @pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
                                   "--text book", "--text book_shelf"])
 @pytest.mark.parametrize("arg3", [" " , "#", "!", "@", "#", "$", "%", "*", "_", "+",
@@ -319,33 +322,57 @@ def test_pattern_s3_02(arg1, arg2, arg3):
         newfile.write("This is a test file for test_appendfilename.")
 
     test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} --smart-prepend")
-    
+
     # analysis section:
     old_filename = str(arg1)
 
-    if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
-        # if (running date2name in default mode) then .true.
-        time_stamp = old_filename[:10]
-        time_stamp_separator = old_filename[10]
-        file_extension = old_filename.split(".")[-1]
+    # test pattern issued by date2name vs. other pattern
+    # default (YYYY-MM-DD)
+    # --withtime (YYYY-MM-DDTHH.MM.SS)
+    # --compact (YYYYMMDD)
+    # --month (YYYY-MM)
+    # --short (YYMMDD)
+    if (re.search("^\d{4}-[012]\d-[0-3]\d_", old_filename) or
+        re.search('^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d_', old_filename) or
+        re.search("^\d{4}[012]\d[0-3]\d_", old_filename) or
+        re.search("^\d{4}-[012]\d_", old_filename) or
+        re.search("^\d{2}[012]\d[0-3]\d_", old_filename)):
 
-        old_filename_no_timestamp = old_filename[11:]
-        stem_elements = old_filename_no_timestamp.split(".")[:-1]
-        stem = ".".join(stem_elements)
+        if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
+            # if (running date2name in default mode) then .true.
+            time_stamp = old_filename[:10]
+            time_stamp_separator = old_filename[10]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[11:]
 
-        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
-        assert os.path.isfile(new_filename)
+        elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
+            # if (running date2name --withtime) then .true.
+            time_stamp = old_filename[:19]
+            time_stamp_separator = old_filename[19]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[20:]
 
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
+        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
+            # if (running date2name --compact) then .true.
+            time_stamp = old_filename[:8]
+            time_stamp_separator = old_filename[8]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[9:]
 
-    elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
-        # if (running date2name --withtime) then .true.
-        time_stamp = old_filename[:19]
-        time_stamp_separator = old_filename[19]
-        file_extension = old_filename.split(".")[-1]
+        elif re.search("^\d{4}-\d{2}_", old_filename):
+            # if (running date2name --month) then .true.
+            time_stamp = old_filename[:7]
+            time_stamp_separator = old_filename[7]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[8:]
 
-        old_filename_no_timestamp = old_filename[20:]
+        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
+            # if (running date2name --short) then .true.
+            time_stamp = old_filename[:6]
+            time_stamp_separator = old_filename[6]
+            file_extension = old_filename.split(".")[-1]
+            old_filename_no_timestamp = old_filename[7:]
+
         stem_elements = old_filename_no_timestamp.split(".")[:-1]
         stem = ".".join(stem_elements)
 

@@ -5,7 +5,7 @@
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
 # edit:    [2024-10-31 Thu]
-#
+
 """Test pad for functions by appendfilename with pytest.
 
 Written for Python 3.9.9 and pytest 6.2.4 for Python 3 as provided by
