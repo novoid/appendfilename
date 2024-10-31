@@ -55,7 +55,7 @@ jobs:
       - name: run the check by pytest
         run: python -m pytest
 
-  test-macos-14
+  test-macos-14:
     runs-on: macos-14
     timeout-minutes: 2
 
