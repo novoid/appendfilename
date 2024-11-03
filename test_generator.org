@@ -1,7 +1,7 @@
 # name:    test_generator.org
 # author:  nbehrnd@yahoo.com
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-10-31 Thu]
+# edit:    [2024-11-03 Sun]
 # license: GPL3, 2022.
 # Export the tangled files with C-c C-v t
 
@@ -168,6 +168,7 @@ markers =
 ** Building the test script
 
 *** header section
+
     #+BEGIN_SRC python :tangle test_appendfilename.py
 #!/bin/usr/env python3
 
@@ -175,7 +176,7 @@ markers =
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-10-31 Thu]
+# edit:    [2024-11-03 Sun]
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -197,60 +198,89 @@ cases, the progress of the ongoing tests is reported to the CLI (flag -v)."""
 
 import re
 import os
-import pytest
+import shlex
 import sys
 import subprocess
 
-from pathlib import Path
-from subprocess import getstatusoutput, getoutput
+from itertools import product
 
-PROGRAM = str(Path("appendfilename") / "__init__.py")  # Cross-platform path
+import pytest
+
+PROGRAM = os.path.join("appendfilename", "__init__.py")  # Cross-platform path
     #+end_src
 
 *** appendfilename, default position
-    
+
     Departing with file =test.txt=, appendfile's addition of =example= should
     yield =test example.txt=.  Testing so far skips the addition of string
     containing spaces, as well as the implicit spacing.
 
     #+begin_src python :tangle test_appendfilename.py
-@pytest.mark.default
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf"])#,
-#                                  "--text book", "--text book_shelf"])
-#@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
-@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%",       "_", "+",
-                                  "=", "-"])
-def test_pattern_s1(arg1, arg2, arg3):
-    """Check addition just ahead the file extension.
+# The following section tests the applications default pattern where a string
+# is added to the file name, just prior to the file's file extension.  The
+# permutation of the three arguments and their levels defines 120 tests.
 
-    arg1   the test files to process
+arg1_values = [
+    "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
+]
+arg2_values = [
+    "-t book", "-t book_shelf", "--text book", "--text book_shelf"
+]
+arg3_values = [
+    "",  # i.e. fall back to default single space
+    "--separator '!'",
+    "--separator '@'",
+    "--separator '#'",
+    "--separator '$'",
+    "--separator '%'",
+    "--separator '_'",
+    "--separator '+'",
+    "--separator '='",
+    "--separator '-'"
+]
+# Note: The check with pytest and `*` as separator in Windows 10 fails.
+
+# create the permutations:
+test_cases = list(product(arg1_values, arg2_values, arg3_values))
+
+@pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
+def test_append(arg1, arg2, arg3):
+    """Test default which appends a string just prior file extension
+
+    arg1   the test file to process, partly inspired by `date2name`
     arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])"""
+    arg3   the separator (at least in Windows 10, do not use `*`)"""
 
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
+    # create a test file:
+    with open(arg1, mode="w", encoding="utf-8") as newfile:
+        newfile.write("This is a place holder.\n")
 
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
+    # run the test to be tested:
+    full_command = ["python", PROGRAM, arg1
+                    ] + shlex.split(arg2) + shlex.split(arg3)
+    subprocess.run(full_command, text = True, check = True)
 
-    # Run the command with cross-platform Python executable and file paths
-    result = subprocess.run(
-        [sys.executable, PROGRAM, arg1, arg2, f"--separator={arg3}"],
-        capture_output=True, text=True, check=True)
+    # construct the new file name to be tested:
+    if len(shlex.split(arg3)) == 0:
+        separator = " "
+    else:
+        separator = shlex.split(arg3)[1]
 
-    new_filename = "".join([arg1[:-4], arg3, " ", text, str(".txt")])
+    new_filename = "".join(
+        [ arg1[:-4], separator,
+          shlex.split(arg2)[1], ".txt" ])
+    print(f"test criterion: {new_filename}")  # visible by optional `pytest -s`
+
+    # is the new file present?
     assert os.path.isfile(new_filename)
 
-    # space cleaning
+    # check if the OS can process the new file / space cleaning
     os.remove(new_filename)
-
+    assert os.path.isfile(new_filename) is False
     #+end_src
 
 *** appendfilename, prepend position
-    
+
     Departing with file =test.txt=, appendfile's addition of =example=
     should yield =example test.txt=.  Testing so far skips the
     addition of string containing spaces, as well as the implicit
@@ -292,7 +322,7 @@ def test_pattern_s2(arg1, arg2, arg3, arg4):
     #+end_src
 
 *** appendfilename, smart prepend position
-    
+
     If a file has a leading time stamp like =YYYY-MM-DD_=, or
     =YYYY-MM-DDTHH:MM:SS_=, than a smart addition of the text to the
     file name should follow this.  So far, the tests recognize only

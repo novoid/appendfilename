@@ -4,8 +4,8 @@
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-10-31 Thu]
-
+# edit:    [2024-11-03 Sun]
+#
 """Test pad for functions by appendfilename with pytest.
 
 Written for Python 3.9.9 and pytest 6.2.4 for Python 3 as provided by
@@ -26,44 +26,73 @@ cases, the progress of the ongoing tests is reported to the CLI (flag -v)."""
 
 import re
 import os
-import pytest
+import shlex
 import sys
 import subprocess
 
-from pathlib import Path
-from subprocess import getstatusoutput, getoutput
+from itertools import product
 
-PROGRAM = str(Path("appendfilename") / "__init__.py")  # Cross-platform path
+import pytest
 
-@pytest.mark.default
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf"])#,
-#                                  "--text book", "--text book_shelf"])
-#@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
-@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%",       "_", "+",
-                                  "=", "-"])
-def test_pattern_s1(arg1, arg2, arg3):
-    """Check addition just ahead the file extension.
+PROGRAM = os.path.join("appendfilename", "__init__.py")  # Cross-platform path
 
-    arg1   the test files to process
+# The following section tests the applications default pattern where a string
+# is added to the file name, just prior to the file's file extension.
+
+arg1_values = [
+    "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
+]
+arg2_values = [
+    "-t book", "-t book_shelf", "--text book", "--text book_shelf"
+]
+arg3_values = [
+    "",  # i.e. fall back to default single space
+    "--separator '!'",
+    "--separator '@'",
+    "--separator '#'",
+    "--separator '$'",
+    "--separator '%'",
+    "--separator '_'",
+    "--separator '+'",
+    "--separator '='",
+    "--separator '-'"
+]
+# Note: The check with pytest and `*` as separator in Windows 10 fails.
+
+# create the permutations:
+test_cases = list(product(arg1_values, arg2_values, arg3_values))
+
+@pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
+def test_append(arg1, arg2, arg3):
+    """Test default which appends a string just prior file extension
+
+    arg1   the test file to process, partly inspired by `date2name`
     arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])"""
+    arg3   the separator (at least in Windows 10, do not use `*`)"""
 
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
+    # create a test file:
+    with open(arg1, mode="w", encoding="utf-8") as newfile:
+        newfile.write("This is a place holder.\n")
 
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
+    # run the test to be tested:
+    full_command = ["python", PROGRAM, arg1
+                    ] + shlex.split(arg2) + shlex.split(arg3)
+    subprocess.run(full_command, text = True, check = True)
 
-    # Run the command with cross-platform Python executable and file paths
-    result = subprocess.run(
-        [sys.executable, PROGRAM, arg1, arg2, f"--separator={arg3}"],
-        capture_output=True, text=True, check=True)
+    # construct the new file name to be tested:
+    if len(shlex.split(arg3)) == 0:
+        separator = " "
+    else:
+        separator = shlex.split(arg3)[1]
 
-    new_filename = "".join([arg1[:-4], arg3, " ", text, str(".txt")])
+    new_filename = "".join(
+        [ arg1[:-4], separator,
+          shlex.split(arg2)[1], ".txt" ])
+    print(f"test criterion: {new_filename}")  # visible by optional `pytest -s`
+
+    # is the new file present?
     assert os.path.isfile(new_filename)
 
-    # space cleaning
+    # check if the OS can process the new file / space cleaning
     os.remove(new_filename)
+    assert os.path.isfile(new_filename) is False
