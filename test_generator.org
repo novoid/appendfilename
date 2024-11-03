@@ -292,11 +292,15 @@ def test_append(arg1, arg2, arg3):
 *** appendfilename, prepend position
 
     Departing with file =test.txt=, appendfile's addition of =example=
-    should yield =example test.txt=.  Testing so far skips the
-    addition of string containing spaces, as well as the implicit
-    spacing.
+    should yield =example test.txt=.  The 240 tests equally consider the
+    separator between the string added, and the original file name.
 
     #+begin_src python :tangle test_appendfilename.py
+
+# The following section is about tests to prepend a user defined string and
+# an adjustable separator to the original file name of the file submitted.  By
+# permutation of the parameter's levels, this defines 240 tests.
+
 arg1_values = [
     "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
 ]
@@ -356,41 +360,6 @@ def test_prepend(arg1, arg2, arg3, arg4):
     assert os.path.isfile(new_filename)
 
     # check if the OS can process the new file / space cleaning
-    os.remove(new_filename)
-    assert os.path.isfile(new_filename) is False
-    #+end_src
-
-
-@pytest.mark.prepend
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt",
-                                  "20211231_test.txt", "2012-12_test.txt",
-                                  "211231_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
-                                  "--text book", "--text book_shelf"])
-@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
-                                  "=", "-"])
-@pytest.mark.parametrize("arg4", ["-p", "--prepend"])
-def test_pattern_s2(arg1, arg2, arg3, arg4):
-    """Check addition just ahead the file extension.
-
-    arg1   the test files to process
-    arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])
-    arg4   use either of two forms of the prepend flag."""
-
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
-
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
-
-    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} {arg4}")
-
-    new_filename = "".join([text, arg3, arg1])
-    assert os.path.isfile(new_filename)
-
     os.remove(new_filename)
     assert os.path.isfile(new_filename) is False
     #+end_src

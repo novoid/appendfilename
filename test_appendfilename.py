@@ -108,6 +108,10 @@ def test_append(arg1, arg2, arg3):
     os.remove(new_filename)
     assert os.path.isfile(new_filename) is False
 
+# The following section is about tests to prepend a user defined string and
+# an adjustable separator to the original file name of the file submitted.  By
+# permutation of the parameter's levels, this defines 240 tests.
+
 arg1_values = [
     "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
 ]
