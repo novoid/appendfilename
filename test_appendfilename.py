@@ -8,21 +8,31 @@
 #
 """Test pad for functions by appendfilename with pytest.
 
-Written for Python 3.9.9 and pytest 6.2.4 for Python 3 as provided by
-Linux Debian 12/bookworm, branch testing, this is a programmatic check
+Initially written for Python 3.9.9 and pytest 6.2.4 and recently update
+for Python 3.12.6/pytest 8.3.3, this script provides a programmatic check
 of functions offered by appendfilename.  Deposit this script in the root of
-the folder fetched and unzipped from PyPi or GitHub.  If your system
-includes both legacy Python 2 and Python 3, pytest for Python 3 likely
-is named pytest-3; otherwise only pytest.  Thus, adjust your input on
-the CLI accordingly when running either one of
+the folder fetched and unzipped from PyPi or GitHub.  Create a virtual
+environment for Python, e.g. by
 
-pytest -v test_appendfilename.py
-pytest-3 -v test_appendfilename.py
+```shell
+python -m venv sup
+```
 
-These instruction initiate a verbose testing (flag -v) reported back to the
-CLI.re will be a verbose report to the CLI The script either stops when one of
-the tests fail (flag -x), or after completion of the test sequence.  In both
-cases, the progress of the ongoing tests is reported to the CLI (flag -v)."""
+In the activated virtual environment, ensure the dependencies are met -
+either by `pip install pyreadline3 pytest`, or `pip install -r requirements.txt`
+- and launch the tests by
+
+```shell
+python -m pytest
+```
+
+As a reminder, the following optional pytest flags may be useful to obtain
+a report tailored to your needs:
+
+- `-x` exits right after the first failing test (reported by `E` instead of `.`)
+- `-v` provide a more verbose output
+- `-s` equally report the test criterion, e.g. the queried file name
+"""
 
 import re
 import os
@@ -37,7 +47,8 @@ import pytest
 PROGRAM = os.path.join("appendfilename", "__init__.py")  # Cross-platform path
 
 # The following section tests the applications default pattern where a string
-# is added to the file name, just prior to the file's file extension.
+# is added to the file name, just prior to the file's file extension.  The
+# permutation of the three arguments and their levels defines 120 tests.
 
 arg1_values = [
     "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
