@@ -73,6 +73,7 @@ arg3_values = [
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
 
+@pytest.mark.default
 @pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
 def test_append(arg1, arg2, arg3):
     """Test default which appends a string just prior file extension
@@ -139,6 +140,7 @@ arg4_values = [
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values, arg4_values))
 
+@pytest.mark.prepend
 @pytest.mark.parametrize("arg1, arg2, arg3, arg4", test_cases)
 def test_prepend(arg1, arg2, arg3, arg4):
     """test to prepend a string to the original file name
@@ -209,6 +211,7 @@ arg3_values = [
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
 
+@pytest.mark.smart
 @pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
 def test_smart_prepend(arg1, arg2, arg3):
     """test the insertion of a new string just past the time stamp
