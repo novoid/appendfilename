@@ -1,7 +1,7 @@
 # name:    test_generator.org
 # author:  nbehrnd@yahoo.com
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-11-03 Sun]
+# edit:    [2024-11-05 Tue]
 # license: GPL3, 2022.
 # Export the tangled files with C-c C-v t
 
@@ -176,7 +176,7 @@ Markers =
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-11-03 Sun]
+# edit:    [2024-11-05 Tue]
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -366,101 +366,140 @@ def test_prepend(arg1, arg2, arg3, arg4):
 
 *** appendfilename, smart prepend position
 
-    If a file has a leading time stamp like =YYYY-MM-DD_=, or
-    =YYYY-MM-DDTHH:MM:SS_=, than a smart addition of the text to the
-    file name should follow this.  So far, the tests recognize only
-    these two pattern issued by =date2name=, or the absence of such.
+    Here, the additional string follows the time stamp, and leads
+    the rest of the file's file name.  Of five patterns provided by
+    `date2name`, only `--withtime` and the default YYYY-MM-DD are
+    checked.  The other three (`--compact`, `--month`, and `--short`)
+    are muted for their pattern still different to the other two.
+    Equally see [[https://github.com/novoid/appendfilename/issues/15]]
+    and [[https://github.com/novoid/appendfilename/issues/16]].
 
-    #+begin_src python :tangle no
-@pytest.mark.smart
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt", "20211231_test.txt",
-                                  "2021-12_test.txt", "211231_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
-                                  "--text book", "--text book_shelf"])
-@pytest.mark.parametrize("arg3", [" " , "#", "!", "@", "#", "$", "%", "*", "_", "+",
-                                  "=", "-"])
-def test_pattern_s3_02(arg1, arg2, arg3):
-    """Check addition retaining time stamp on leading position.
+    The permutation of the parameter's active levels define 8 tests.
 
-    arg1   the test files to process
+    #+begin_src python :tangle test_appendfilename.py
+
+# This section tests the insertion of a string into the file's file name
+# just after the file's time or date stamp as provided `date2name`.
+
+arg1_values = [
+    "2021-12-31T18.48.22_test.txt",
+    "2021-12-31_test.txt",
+#    "20211231_test.txt",  # by now `20211231_test.txt` -> 20211231_test ping.txt
+#    "2021-12_test.txt",   # by now `2021-12_test.txt` -> `2021-12_test ping.txt`
+#    "211231_test.txt"     # by now `211231_test.txt` -> `211231_test ping.txt`
+]
+arg2_values = [
+    "-t book",
+    "-t book_shelf",
+    "--text book",
+    "--text book_shelf"
+]
+arg3_values = [
+    "",  # i.e. fall back to default single space
+#    "--separator '!'",
+#    "--separator '@'",
+#    "--separator '#'",
+#    "--separator '$'",
+#    "--separator '%'",
+#    "--separator '_'",
+#    "--separator '+'",
+#    "--separator '='",
+#    "--separator '-'"
+]
+# Note: The check with pytest and `*` as separator in Windows 10 fails.
+# Contrasting to Linux Debian 13, a `pytest` in Windows 10 revealed every
+# of these special characters can not safely used as an additional separator.
+
+# create the permutations:
+test_cases = list(product(arg1_values, arg2_values, arg3_values))
+
+@pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
+def test_smart_prepend(arg1, arg2, arg3):
+    """test the insertion of a new string just past the time stamp
+
+    arg1   the test file to process, partly inspired by `date2name`
     arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])."""
+    arg3   the separator (at least in Windows 10, do not use `*`
+    """
+    time_stamp = ""
+    time_stamp_separator = ""
+    old_filename_no_timestamp = ""
 
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
+    # create a test file:
+    with open(arg1, mode="w", encoding="utf-8") as newfile:
+        newfile.write("this is a placeholder\n")
 
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
+    #run `appendfilename` on this test file
+    run_appendfilename = " ".join(
+        ["python", PROGRAM, arg1, arg2, arg3, " --smart-prepend"])
+    subprocess.run(run_appendfilename, shell=True, check = True)
 
-    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} --smart-prepend")
+    # construct the new file name to be testedt:
+    old_filename = arg1
 
-    # analysis section:
-    old_filename = str(arg1)
-
-    # test pattern issued by date2name vs. other pattern
-    # default (YYYY-MM-DD)
-    # --withtime (YYYY-MM-DDTHH.MM.SS)
-    # --compact (YYYYMMDD)
-    # --month (YYYY-MM)
-    # --short (YYMMDD)
-    if (re.search("^\d{4}-[012]\d-[0-3]\d_", old_filename) or
-        re.search('^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d_', old_filename) or
-        re.search("^\d{4}[012]\d[0-3]\d_", old_filename) or
-        re.search("^\d{4}-[012]\d_", old_filename) or
-        re.search("^\d{2}[012]\d[0-3]\d_", old_filename)):
-
-        if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
-            # if (running date2name in default mode) then .true.
-            time_stamp = old_filename[:10]
-            time_stamp_separator = old_filename[10]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[11:]
-
-        elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
-            # if (running date2name --withtime) then .true.
-            time_stamp = old_filename[:19]
-            time_stamp_separator = old_filename[19]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[20:]
-
-        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
-            # if (running date2name --compact) then .true.
-            time_stamp = old_filename[:8]
-            time_stamp_separator = old_filename[8]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[9:]
-
-        elif re.search("^\d{4}-\d{2}_", old_filename):
-            # if (running date2name --month) then .true.
-            time_stamp = old_filename[:7]
-            time_stamp_separator = old_filename[7]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[8:]
-
-        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
-            # if (running date2name --short) then .true.
-            time_stamp = old_filename[:6]
-            time_stamp_separator = old_filename[6]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[7:]
-
-        stem_elements = old_filename_no_timestamp.split(".")[:-1]
-        stem = ".".join(stem_elements)
-
-        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
-        assert os.path.isfile(new_filename)
-
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
-
+    # account for the implicit separator, i.e. the single space:
+    if len(shlex.split(arg3)) == 0:
+        separator = " "
     else:
-        # within the scope set, a file which did not pass date2name earlier
-        new_filename = "".join([text, arg3, old_filename])
-        assert os.path.isfile(new_filename)
+        separator = shlex.split(arg3)[1]
 
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
+    # Time stamps `date2name` provides can be either one of five formats
+    #
+    # YYYY-MM-DDTHH.MM.SS   `--withtime`
+    # YYYY-MM-DD            default
+    # YYYYMMDD              `--compact`
+    # YYYY-MM               `--month`
+    # YYMMDD                `--short`
+
+    # Currently, one observes two patterns by `appendfilename`: one which
+    # substitutes the separator by `date2name`, the other which retains it.
+    # Note patterns `compact`, `month`, and `short`, currently append the
+    # additional string rather than smartly prepend after the date stamp --
+    # for now, these three are not tested.  Equally see discussions 15 and 16,
+    # https://github.com/novoid/appendfilename/issues/15
+    # https://github.com/novoid/appendfilename/issues/16
+
+    # pattern `--with-time`
+    if re.search(r"^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d", old_filename):
+        time_stamp = old_filename[:19]
+        time_stamp_separator = old_filename[19]
+        old_filename_no_timestamp = old_filename[20:]
+
+    # default pattern
+    elif re.search(r"^\d{4}-[012]\d-[0-3]\d", old_filename):
+        time_stamp = old_filename[:10]
+        time_stamp_separator = old_filename[10]
+        old_filename_no_timestamp = old_filename[11:]
+
+    # pattern `--compact`  # currently fails
+    elif re.search(r"^\d{4}[012]\d[0-3]\d", old_filename):
+        time_stamp = old_filename[:8]
+        time_stamp_separator = old_filename[8]
+        old_filename_no_timestamp = old_filename[9:]
+
+    # pattern `--month`  # currently fails
+    elif re.search(r"^\d{4}-[012]\d", old_filename):
+        time_stamp = old_filename[:7]
+        time_stamp_separator = old_filename[7]
+        old_filename_no_timestamp = old_filename[8:]
+
+    # pattern `--short`  # currently fails
+    elif re.search(r"^\d{4}[012]\d[012]\d", old_filename):
+        time_stamp = old_filename[:6]
+        time_stamp_separator = old_filename[6]
+        old_filename_no_timestamp = old_filename[7:]
+
+    new_filename = "".join([time_stamp, #time_stamp_separator,
+        separator, shlex.split(arg2)[1], separator,
+        old_filename_no_timestamp ])
+
+    # is the new file present?
+    print("\nnew_filename")  # optional check for `pytest -s`
+    print(new_filename)
+    assert os.path.isfile(new_filename)
+
+    # check if the IS can process the new file / space cleaning
+    os.remove(new_filename)
+    assert os.path.isfile(new_filename) is False
     #+end_src
 
