@@ -19,7 +19,7 @@ on:
 jobs:
   test-ubuntu-2404:
     runs-on: ubuntu-24.04
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +34,14 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run the check by pytest
-        run: python -m pytest
+        run: |
+          python -m pytest -m "default"
+          python -m pytest -m "prepend"
+          python -m pytest -m "smart"
 
   test-windows-2022:
     runs-on: windows-2022
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -53,11 +56,15 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run the check by pytest
-        run: python -m pytest
+        run: |
+          python -m pytest -m "default"
+          python -m pytest -m "prepend"
+          python -m pytest -m "smart"
+
 
   test-macos-14:
     runs-on: macos-14
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -72,4 +79,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run the check by pytest
-        run: python -m pytest
+        run: |
+          python -m pytest -m "default"
+          python -m pytest -m "prepend"
+          python -m pytest -m "smart"
+
