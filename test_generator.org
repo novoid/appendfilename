@@ -1,7 +1,7 @@
 # name:    test_generator.org
 # author:  nbehrnd@yahoo.com
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-10-31 Thu]
+# edit:    [2024-11-05 Tue]
 # license: GPL3, 2022.
 # Export the tangled files with C-c C-v t
 
@@ -12,34 +12,44 @@
   The application =appendfilename= by Karl Voit /et al./ ([[https://github.com/novoid/appendfilename][source]])
   allows the programmatic addition of user defined strings to one or
   multiple already existing file names (e.g., add =travel= to file
-  =example.jpg= to yield =example_travel.jpg=).  By the command =C-c
-  C-v t=, Emacs may use the present =.org= file to (re)generate a
-  tangled test script, file =test_appendfilename.py= for a
-  programmatic testing by [[https://docs.pytest.org/en/latest/][pytest]].  (Though =pytest= is not part of the
-  Python standard library, it may be obtained easily e.g., from [[https://pypi.org/project/pytest/][PyPi]].)
-  Optionally, the testing may be run by the equally tangled
-  =Makefile=.
+  =example.jpg= to yield =example_travel.jpg=).  This file
+  =test_generator.org= provides the files for a programmatic test
+  of =appendfilename= by means of /code tangle/ from Emacs orgmode.
 
 * Deployment
 
-  The programmatic tests are set up for pytest for Python 3.  It
-  however depends on your installation (and in case of Linux, the
-  authors of your Linux distribution ([[https://github.com/pytest-dev/pytest/discussions/9481][reference]])) if this utility may
-  be started by =pytest= (e.g., the pattern in pytest's manual), or by
-  =pytest-3= by either one of the pattern below:
+  The tests presume a working installation of Python 3.  After the
+  activation of a virtual environment, one suitable approach is to
+  resolve the dependencies by
 
-  #+begin_src bash :tangle no
-pytest -v test_appendfilename.py
-pytest-3 -v test_appendfilename.py
+  #+begin_src shell :tangle no
+python -m pip install -r requirements.txt
   #+end_src
 
-  As of writing, the later pattern is the to be used e.g., in Linux
-  Debian 12/bookworm (branch testing) to discern pytest (for
-  contemporary Python 3) from pytest (for legacy Python 2).
+  with data by PyPI.  Subsequently, the tests can be launched by
 
-  The =Makefile= this =org= file provides for convenience running
-  these tests assumes the later syntax pattern.  (It might be
-  necessary to provide the executable bit to activate the Makefile.)
+  #+begin_src shell :tangle no
+python -m pytest
+  #+end_src
+
+  where each period (=.=) indicates a passing, and each =E= a failing
+  test.  An optional flag
+
+  - =-v= allows a more verbose output to the CLI
+  - =-x= stops the sequence after the first failing test
+  - =-s= occasionally provides information e.g., about the tests' criteria
+
+  The tests are organized in sets =default=, =prepend=, and =smart=.
+  This allows to selectively run only checks which are about the
+  results by =appendfilename= in the /default/ mode, /prepend/ mode,
+  or /smart prepend/ mode alone, e.g.
+
+  #+begin_src shell :tangle no
+python -m pytest -m "prepend"
+  #+end_src
+
+  The tests were revised to work equally well in Linux Debian 13/trixie
+  (e.g., Python 3.12.6 and pytest 8.3.3) as well as Windows 10.
 
 * Setup of Emacs
 
@@ -99,75 +109,47 @@ pytest-3 -v test_appendfilename.py
 
 * Building the tests
 
-** Building of the Makefile
+** Building file =pytest.ini=
 
-   The setup is for GNU Make 4.3 as provided e.g., by Linux Debian 12
-   (bookworm), branch testing.  Note, the Makefile tangled is a mere
-   convenient moderator for =test_appendfilename.py=; the eventual
-   testing of appendfilename's action does not depend on this
-   Makefile.
-
-    #+BEGIN_SRC makefile :tangle Makefile
-# GNU Make file for the automation of pytest for appendfilename
-#
-# While the test script is written for Python 3.9.2, it depends on
-# your installation of pytest (and in case of Linux, the authors of
-# your distribution) if pytest for Python 3 is invoked either by
-# pytest, or pytest-3.  In some distributions, pytest actually may
-# invoke pyest for legacy Python 2; the tests in test_date2name.py
-# however are incompatible to this.
-#
-# Put this file like test_appendfilename.py in the root folder of
-# appendfilename fetched from PyPi or GitHub.  Then run
-#
-# chmod +x *
-# make ./Makefile
-#
-# to run the tests.  If you want pytest to exit the test sequence
-# right after the first test failing, use the -x flag to the
-# instructions on the CLI in addition to the verbosity flag to (-v).
-
-# pytest -v test_appendfilename.py     # the pattern by pytest's manual
-pytest-3 -v test_appendfilename.py   # the alternative pattern (e.g., Debian 12)
-    #+end_src
-
-** Building a pytest.ini
-
-   This file defines markers to assign tests into groups.  This allows to run
-   =pytest= on a subset rather than all tests (which is set up as the default).
-   E.g., in presence of =pytest.ini=, a call like
+   Markers file =pytest.ini= defines and which are used in file
+   =test_appendfilename.py= allows to constrain the run of
+   =pytest=.  Rather than to launch a check on all tests, a call
+   like e.g.,
 
    #+begin_src bash  :tangle no
-pytest-3 test_appendfilename.py -v -m "default"
+python -m pytest -m "prepend"
    #+end_src
 
-   constrains the tester's action to all tests labeled as "default" as about the
-   default position where the text string is added.  At present, tests are
+   only checks those of set =prepend=.  At present, tests are
    grouped as
-   + default; appendfilename's default string insertions
-   + prepend; corresponding to appendfilename's optional -p/--prepend flag, and
-   + smart; corresponding to appendfilename's optional --smart-prepend flag
-     
-   It is possible to run one, two, or all three groups in one run of pytest.
-   E.g., a simultaneous check of tests belonging to either default, or prepend
-   optional requires the instruction
+
+   + =default= appendfilename's default string insertions
+   + =prepend= corresponding to either appendfilename's optional =-p=
+     or =--prepend= flag, and
+   + =smart= corresponding to appendfilename's optional
+    =--smart-prepend= flag
+
+   It is possible to run one, two, or all three groups in one run of
+   pytest, for instance
 
    #+begin_src bash :tangle no
 pytest-3 test_appendfilename.py -m "default and prepend" -v
    #+end_src
 
-   #+begin_src python :tangle no
-[pytest]
-markers =
-    default:  check the default insertion position of appendfile
-    prepend:  check the prepend insertion position of appendfile
-    smart:    check the smart-prepend insertion position of appendfile
-   #+end_src
+   The content of =pytest.ini=:
 
+   #+begin_src shell :tangle pytest.ini
+[pytest]
+Markers =
+    default:  appendfilename's default string insertions
+    prepend:  appendfilename's optional -p/--prepend flag
+    smart:    appendfilename's optional --smart-prepend flag
+   #+end_src
 
 ** Building the test script
 
 *** header section
+
     #+BEGIN_SRC python :tangle test_appendfilename.py
 #!/bin/usr/env python3
 
@@ -175,219 +157,332 @@ markers =
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-10-31 Thu]
+# edit:    [2024-11-05 Tue]
 #
 """Test pad for functions by appendfilename with pytest.
 
-Written for Python 3.9.9 and pytest 6.2.4 for Python 3 as provided by
-Linux Debian 12/bookworm, branch testing, this is a programmatic check
+Initially written for Python 3.9.9 and pytest 6.2.4 and recently update
+for Python 3.12.6/pytest 8.3.3, this script provides a programmatic check
 of functions offered by appendfilename.  Deposit this script in the root of
-the folder fetched and unzipped from PyPi or GitHub.  If your system
-includes both legacy Python 2 and Python 3, pytest for Python 3 likely
-is named pytest-3; otherwise only pytest.  Thus, adjust your input on
-the CLI accordingly when running either one of
+the folder fetched and unzipped from PyPi or GitHub.  Create a virtual
+environment for Python, e.g. by
 
-pytest -v test_appendfilename.py
-pytest-3 -v test_appendfilename.py
+```shell
+python -m venv sup
+```
 
-These instruction initiate a verbose testing (flag -v) reported back to the
-CLI.re will be a verbose report to the CLI The script either stops when one of
-the tests fail (flag -x), or after completion of the test sequence.  In both
-cases, the progress of the ongoing tests is reported to the CLI (flag -v)."""
+In the activated virtual environment, ensure the dependencies are met -
+either by `pip install pyreadline3 pytest`, or `pip install -r requirements.txt`
+- and launch the tests by
+
+```shell
+python -m pytest
+```
+
+As a reminder, the following optional pytest flags may be useful to obtain
+a report tailored to your needs:
+
+- `-x` exits right after the first failing test (reported by `E` instead of `.`)
+- `-v` provide a more verbose output
+- `-s` equally report the test criterion, e.g. the queried file name
+"""
 
 import re
 import os
-import pytest
+import shlex
 import sys
 import subprocess
 
-from pathlib import Path
-from subprocess import getstatusoutput, getoutput
+from itertools import product
 
-PROGRAM = str(Path("appendfilename") / "__init__.py")  # Cross-platform path
+import pytest
+
+PROGRAM = os.path.join("appendfilename", "__init__.py")  # Cross-platform path
     #+end_src
 
 *** appendfilename, default position
-    
+
     Departing with file =test.txt=, appendfile's addition of =example= should
-    yield =test example.txt=.  Testing so far skips the addition of string
-    containing spaces, as well as the implicit spacing.
+    yield =test example.txt=.
 
     #+begin_src python :tangle test_appendfilename.py
+# The following section tests the applications default pattern where a string
+# is added to the file name, just prior to the file's file extension.  The
+# permutation of the three arguments and their levels defines 120 tests.
+
+arg1_values = [
+    "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
+]
+arg2_values = [
+    "-t book", "-t book_shelf", "--text book", "--text book_shelf"
+]
+arg3_values = [
+    "",  # i.e. fall back to default single space
+    "--separator '!'",
+    "--separator '@'",
+    "--separator '#'",
+    "--separator '$'",
+    "--separator '%'",
+    "--separator '_'",
+    "--separator '+'",
+    "--separator '='",
+    "--separator '-'"
+]
+# Note: The check with pytest and `*` as separator in Windows 10 fails.
+
+# create the permutations:
+test_cases = list(product(arg1_values, arg2_values, arg3_values))
+
 @pytest.mark.default
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf"])#,
-#                                  "--text book", "--text book_shelf"])
-#@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
-@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%",       "_", "+",
-                                  "=", "-"])
-def test_pattern_s1(arg1, arg2, arg3):
-    """Check addition just ahead the file extension.
+@pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
+def test_append(arg1, arg2, arg3):
+    """Test default which appends a string just prior file extension
 
-    arg1   the test files to process
+    arg1   the test file to process, partly inspired by `date2name`
     arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])"""
+    arg3   the separator (at least in Windows 10, do not use `*`)"""
 
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
+    # create a test file:
+    with open(arg1, mode="w", encoding="utf-8") as newfile:
+        newfile.write("This is a place holder.\n")
 
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
+    # run the test to be tested:
+    full_command = ["python", PROGRAM, arg1
+                    ] + shlex.split(arg2) + shlex.split(arg3)
+    subprocess.run(full_command, text = True, check = True)
 
-    # Run the command with cross-platform Python executable and file paths
-    result = subprocess.run(
-        [sys.executable, PROGRAM, arg1, arg2, f"--separator={arg3}"],
-        capture_output=True, text=True, check=True)
+    # construct the new file name to be tested:
+    if len(shlex.split(arg3)) == 0:
+        separator = " "
+    else:
+        separator = shlex.split(arg3)[1]
 
-    new_filename = "".join([arg1[:-4], arg3, " ", text, str(".txt")])
+    new_filename = "".join(
+        [ arg1[:-4], separator,
+          shlex.split(arg2)[1], ".txt" ])
+    print(f"test criterion: {new_filename}")  # visible by optional `pytest -s`
+
+    # is the new file present?
     assert os.path.isfile(new_filename)
 
-    # space cleaning
+    # check if the OS can process the new file / space cleaning
     os.remove(new_filename)
-
+    assert os.path.isfile(new_filename) is False
     #+end_src
 
 *** appendfilename, prepend position
-    
+
     Departing with file =test.txt=, appendfile's addition of =example=
-    should yield =example test.txt=.  Testing so far skips the
-    addition of string containing spaces, as well as the implicit
-    spacing.
+    should yield =example test.txt=.  The 240 tests equally consider the
+    separator between the string added, and the original file name.
 
-    #+begin_src python :tangle no
+    #+begin_src python :tangle test_appendfilename.py
+
+# The following section is about tests to prepend a user defined string and
+# an adjustable separator to the original file name of the file submitted.  By
+# permutation of the parameter's levels, this defines 240 tests.
+
+arg1_values = [
+    "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
+]
+arg2_values = [
+    "-t book", "-t book_shelf", "--text book", "--text book_shelf"
+]
+arg3_values = [
+    "",  # i.e. fall back to default single space
+    "--separator '!'",
+    "--separator '@'",
+    "--separator '#'",
+    "--separator '$'",
+    "--separator '%'",
+    "--separator '_'",
+    "--separator '+'",
+    "--separator '='",
+    "--separator '-'"
+]
+# Note: The check with pytest and `*` as separator in Windows 10 fails.
+
+arg4_values = [
+    "-p", "--prepend"
+]
+
+# create the permutations:
+test_cases = list(product(arg1_values, arg2_values, arg3_values, arg4_values))
+
 @pytest.mark.prepend
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt",
-                                  "20211231_test.txt", "2012-12_test.txt",
-                                  "211231_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
-                                  "--text book", "--text book_shelf"])
-@pytest.mark.parametrize("arg3", [" ", "!", "@", "#", "$", "%", "*", "_", "+",
-                                  "=", "-"])
-@pytest.mark.parametrize("arg4", ["-p", "--prepend"])
-def test_pattern_s2(arg1, arg2, arg3, arg4):
-    """Check addition just ahead the file extension.
+@pytest.mark.parametrize("arg1, arg2, arg3, arg4", test_cases)
+def test_prepend(arg1, arg2, arg3, arg4):
+    """test to prepend a string to the original file name
 
-    arg1   the test files to process
+    arg1   the test file to process, partly inspired by `date2name`
     arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])
-    arg4   use either of two forms of the prepend flag."""
+    arg3   the separator (at least in Windows 10, do not use `*`)
+    arg4   either short of long form to introduce the string as leading """
 
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
+    # create a test file:
+    with open(arg1, mode="w", encoding="utf-8") as newfile:
+        newfile.write("This is a place holder.\n")
 
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
+    # run the test to be tested:
+    full_command = [
+        "python", PROGRAM, arg1
+        ] + shlex.split(arg2) + shlex.split(arg3) + shlex.split(arg4)
+    subprocess.run(full_command, text = True, check = True)
 
-    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} {arg4}")
+    # construct the new file name to be tested:
+    if len(shlex.split(arg3)) == 0:
+        separator = " "
+    else:
+        separator = shlex.split(arg3)[1]
 
-    new_filename = "".join([text, arg3, arg1])
+    new_filename = "".join( [ shlex.split(arg2)[1], separator, arg1 ] )
+    print(f"test criterion: {new_filename}")  # visible by optional `pytest -s`
+
+    # is the new file present?
     assert os.path.isfile(new_filename)
 
+    # check if the OS can process the new file / space cleaning
     os.remove(new_filename)
     assert os.path.isfile(new_filename) is False
     #+end_src
 
 *** appendfilename, smart prepend position
-    
-    If a file has a leading time stamp like =YYYY-MM-DD_=, or
-    =YYYY-MM-DDTHH:MM:SS_=, than a smart addition of the text to the
-    file name should follow this.  So far, the tests recognize only
-    these two pattern issued by =date2name=, or the absence of such.
 
-    #+begin_src python :tangle no
+    Here, the additional string follows the time stamp, and leads
+    the rest of the file's file name.  Of five patterns provided by
+    =date2name=, only =--withtime= and the default YYYY-MM-DD are
+    checked.  The other three (=--compact=, =--month=, and =--short=)
+    are muted for their pattern still different to the other two.
+    Equally see [[https://github.com/novoid/appendfilename/issues/15]]
+    and [[https://github.com/novoid/appendfilename/issues/16]].
+
+    The permutation of the parameter's active levels define 8 tests.
+
+    #+begin_src python :tangle test_appendfilename.py
+
+# This section tests the insertion of a string into the file's file name
+# just after the file's time or date stamp as provided `date2name`.
+
+arg1_values = [
+    "2021-12-31T18.48.22_test.txt",
+    "2021-12-31_test.txt",
+#    "20211231_test.txt",  # by now `20211231_test.txt` -> 20211231_test ping.txt
+#    "2021-12_test.txt",   # by now `2021-12_test.txt` -> `2021-12_test ping.txt`
+#    "211231_test.txt"     # by now `211231_test.txt` -> `211231_test ping.txt`
+]
+arg2_values = [
+    "-t book",
+    "-t book_shelf",
+    "--text book",
+    "--text book_shelf"
+]
+arg3_values = [
+    "",  # i.e. fall back to default single space
+#    "--separator '!'",
+#    "--separator '@'",
+#    "--separator '#'",
+#    "--separator '$'",
+#    "--separator '%'",
+#    "--separator '_'",
+#    "--separator '+'",
+#    "--separator '='",
+#    "--separator '-'"
+]
+# Note: The check with pytest and `*` as separator in Windows 10 fails.
+# Contrasting to Linux Debian 13, a `pytest` in Windows 10 revealed every
+# of these special characters can not safely used as an additional separator.
+
+# create the permutations:
+test_cases = list(product(arg1_values, arg2_values, arg3_values))
+
 @pytest.mark.smart
-@pytest.mark.parametrize("arg1", ["test.txt", "2021-12-31_test.txt",
-                                  "2021-12-31T18.48.22_test.txt", "20211231_test.txt",
-                                  "2021-12_test.txt", "211231_test.txt"])
-@pytest.mark.parametrize("arg2", ["-t book", "-t book_shelf",
-                                  "--text book", "--text book_shelf"])
-@pytest.mark.parametrize("arg3", [" " , "#", "!", "@", "#", "$", "%", "*", "_", "+",
-                                  "=", "-"])
-def test_pattern_s3_02(arg1, arg2, arg3):
-    """Check addition retaining time stamp on leading position.
+@pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
+def test_smart_prepend(arg1, arg2, arg3):
+    """test the insertion of a new string just past the time stamp
 
-    arg1   the test files to process
+    arg1   the test file to process, partly inspired by `date2name`
     arg2   the text string to be added
-    arg3   the explicitly defined text separator (except [a-zA-Z])."""
+    arg3   the separator (at least in Windows 10, do not use `*`
+    """
+    time_stamp = ""
+    time_stamp_separator = ""
+    old_filename_no_timestamp = ""
 
-    # extract the newly added text information:
-    text_elements = arg2.split(" ")[1:]
-    text = str(" ".join(text_elements))
+    # create a test file:
+    with open(arg1, mode="w", encoding="utf-8") as newfile:
+        newfile.write("this is a placeholder\n")
 
-    with open(arg1, mode="w") as newfile:
-        newfile.write("This is a test file for test_appendfilename.")
+    #run `appendfilename` on this test file
+    run_appendfilename = " ".join(
+        ["python", PROGRAM, arg1, arg2, arg3, " --smart-prepend"])
+    subprocess.run(run_appendfilename, shell=True, check = True)
 
-    test = getoutput(f"python3 {PROGRAM} {arg1} {arg2} --separator={arg3} --smart-prepend")
+    # construct the new file name to be testedt:
+    old_filename = arg1
 
-    # analysis section:
-    old_filename = str(arg1)
-
-    # test pattern issued by date2name vs. other pattern
-    # default (YYYY-MM-DD)
-    # --withtime (YYYY-MM-DDTHH.MM.SS)
-    # --compact (YYYYMMDD)
-    # --month (YYYY-MM)
-    # --short (YYMMDD)
-    if (re.search("^\d{4}-[012]\d-[0-3]\d_", old_filename) or
-        re.search('^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d_', old_filename) or
-        re.search("^\d{4}[012]\d[0-3]\d_", old_filename) or
-        re.search("^\d{4}-[012]\d_", old_filename) or
-        re.search("^\d{2}[012]\d[0-3]\d_", old_filename)):
-
-        if re.search("^\d{4}-\d{2}-\d{2}_", old_filename):
-            # if (running date2name in default mode) then .true.
-            time_stamp = old_filename[:10]
-            time_stamp_separator = old_filename[10]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[11:]
-
-        elif re.search('^\d{4}-\d{2}-\d{2}T\d{2}\.\d{2}\.\d{2}_', old_filename):
-            # if (running date2name --withtime) then .true.
-            time_stamp = old_filename[:19]
-            time_stamp_separator = old_filename[19]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[20:]
-
-        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
-            # if (running date2name --compact) then .true.
-            time_stamp = old_filename[:8]
-            time_stamp_separator = old_filename[8]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[9:]
-
-        elif re.search("^\d{4}-\d{2}_", old_filename):
-            # if (running date2name --month) then .true.
-            time_stamp = old_filename[:7]
-            time_stamp_separator = old_filename[7]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[8:]
-
-        elif re.search("^\d{4}\d{2}\d{2}_", old_filename):
-            # if (running date2name --short) then .true.
-            time_stamp = old_filename[:6]
-            time_stamp_separator = old_filename[6]
-            file_extension = old_filename.split(".")[-1]
-            old_filename_no_timestamp = old_filename[7:]
-
-        stem_elements = old_filename_no_timestamp.split(".")[:-1]
-        stem = ".".join(stem_elements)
-
-        new_filename = "".join([time_stamp, arg3, text, arg3, stem, str("."), file_extension])
-        assert os.path.isfile(new_filename)
-
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
-
+    # account for the implicit separator, i.e. the single space:
+    if len(shlex.split(arg3)) == 0:
+        separator = " "
     else:
-        # within the scope set, a file which did not pass date2name earlier
-        new_filename = "".join([text, arg3, old_filename])
-        assert os.path.isfile(new_filename)
+        separator = shlex.split(arg3)[1]
 
-        os.remove(new_filename)
-        assert os.path.isfile(new_filename) is False
+    # Time stamps `date2name` provides can be either one of five formats
+    #
+    # YYYY-MM-DDTHH.MM.SS   `--withtime`
+    # YYYY-MM-DD            default
+    # YYYYMMDD              `--compact`
+    # YYYY-MM               `--month`
+    # YYMMDD                `--short`
+
+    # Currently, one observes two patterns by `appendfilename`: one which
+    # substitutes the separator by `date2name`, the other which retains it.
+    # Note patterns `compact`, `month`, and `short`, currently append the
+    # additional string rather than smartly prepend after the date stamp --
+    # for now, these three are not tested.  Equally see discussions 15 and 16,
+    # https://github.com/novoid/appendfilename/issues/15
+    # https://github.com/novoid/appendfilename/issues/16
+
+    # pattern `--with-time`
+    if re.search(r"^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d", old_filename):
+        time_stamp = old_filename[:19]
+        time_stamp_separator = old_filename[19]
+        old_filename_no_timestamp = old_filename[20:]
+
+    # default pattern
+    elif re.search(r"^\d{4}-[012]\d-[0-3]\d", old_filename):
+        time_stamp = old_filename[:10]
+        time_stamp_separator = old_filename[10]
+        old_filename_no_timestamp = old_filename[11:]
+
+    # pattern `--compact`  # currently fails
+    elif re.search(r"^\d{4}[012]\d[0-3]\d", old_filename):
+        time_stamp = old_filename[:8]
+        time_stamp_separator = old_filename[8]
+        old_filename_no_timestamp = old_filename[9:]
+
+    # pattern `--month`  # currently fails
+    elif re.search(r"^\d{4}-[012]\d", old_filename):
+        time_stamp = old_filename[:7]
+        time_stamp_separator = old_filename[7]
+        old_filename_no_timestamp = old_filename[8:]
+
+    # pattern `--short`  # currently fails
+    elif re.search(r"^\d{4}[012]\d[012]\d", old_filename):
+        time_stamp = old_filename[:6]
+        time_stamp_separator = old_filename[6]
+        old_filename_no_timestamp = old_filename[7:]
+
+    new_filename = "".join([time_stamp, #time_stamp_separator,
+        separator, shlex.split(arg2)[1], separator,
+        old_filename_no_timestamp ])
+
+    # is the new file present?
+    print("\nnew_filename")  # optional check for `pytest -s`
+    print(new_filename)
+    assert os.path.isfile(new_filename)
+
+    # check if the IS can process the new file / space cleaning
+    os.remove(new_filename)
+    assert os.path.isfile(new_filename) is False
     #+end_src
 

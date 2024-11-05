@@ -26,7 +26,7 @@ FILENAME_TAG_SEPARATOR = ' -- '  # between file name and (optional) list of tags
 BETWEEN_TAG_SEPARATOR = ' '  # between tags (not that relevant in this tool)
 DEFAULT_TEXT_SEPARATOR = ' '  # between old file name and inserted text
 RENAME_SYMLINK_ORIGINALS_WHEN_RENAMING_SYMLINKS = True  # if current file is a symlink with the same name, also rename source file
-WITHTIME_AND_SECONDS_PATTERN  = re.compile('^(\d{4,4}-[01]\d-[0123]\d(([T :_-])([012]\d)([:.-])([012345]\d)(([:.-])([012345]\d))?)?)[- _.](.+)')
+WITHTIME_AND_SECONDS_PATTERN  = re.compile(r"^(\d{4,4}-[01]\d-[0123]\d(([T :_-])([012]\d)([:.-])([012345]\d)(([:.-])([012345]\d))?)?)[- _.](.+)")
 
 USAGE = "\n\
     appendfilename [<options>] <list of files>\n\
@@ -60,13 +60,13 @@ Example usages:\n\
 
 
 # file names containing optional tags matches following regular expression
-FILE_WITH_EXTENSION_REGEX = re.compile("(.*?)(( -- .*)?(\.\w+?)?)$")
+FILE_WITH_EXTENSION_REGEX = re.compile(r"(.*?)(( -- .*)?(\.\w+?)?)$")
 FILE_WITH_EXTENSION_BASENAME_INDEX = 1
 FILE_WITH_EXTENSION_TAGS_AND_EXT_INDEX = 2
 
 
 # RegEx which defines "what is a file name component" for tab completion:
-FILENAME_COMPONENT_REGEX = re.compile("[a-zA-Z]+")
+FILENAME_COMPONENT_REGEX = re.compile(r"[a-zA-Z]+")
 
 # blacklist of lowercase strings that are being ignored for tab completion
 FILENAME_COMPONENT_LOWERCASE_BLACKLIST = ['img', 'eine', 'einem', 'eines', 'fuer', 'haben',
