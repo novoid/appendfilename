@@ -34,9 +34,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run the check by pytest
-        run: python -m pytest -m "default"; \
-             python -m pytest -m "prepend"; \
-             python -m pytest -m "smart"
+        run: |
+          python -m pytest -m "default"
+          python -m pytest -m "prepend"
+          python -m pytest -m "smart"
 
   test-windows-2022:
     runs-on: windows-2022
@@ -55,9 +56,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run the check by pytest
-        run: python -m pytest -m "default"; \
-             python -m pytest -m "prepend"; \
-             python -m pytest -m "smart"
+        run: |
+          python -m pytest -m "default"
+          python -m pytest -m "prepend"
+          python -m pytest -m "smart"
 
 
   test-macos-14:
@@ -77,7 +79,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run the check by pytest
-        run: python -m pytest -m "default"; \
-             python -m pytest -m "prepend"; \
-             python -m pytest -m "smart"
+        run: |
+          python -m pytest -m "default"
+          python -m pytest -m "prepend"
+          python -m pytest -m "smart"
 
