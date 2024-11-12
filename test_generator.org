@@ -140,7 +140,7 @@ pytest-3 test_appendfilename.py -m "default and prepend" -v
 
    #+begin_src shell :tangle pytest.ini
 [pytest]
-Markers =
+markers =
     default:  appendfilename's default string insertions
     prepend:  appendfilename's optional -p/--prepend flag
     smart:    appendfilename's optional --smart-prepend flag
