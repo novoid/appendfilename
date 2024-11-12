@@ -467,7 +467,7 @@ def test_smart_prepend(arg1, arg2, arg3):
         old_filename_no_timestamp = old_filename[8:]
 
     # pattern `--short`  # currently fails
-    elif re.search(r"^\d{4}[012]\d[012]\d", old_filename):
+    elif re.search(r"^\d{4}[012]\d[0-3]\d", old_filename):
         time_stamp = old_filename[:6]
         time_stamp_separator = old_filename[6]
         old_filename_no_timestamp = old_filename[7:]
