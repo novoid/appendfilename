@@ -214,7 +214,7 @@ arg3_values = [
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
 
 
-@pytest.mark.smart
+@pytest.mark.smart_prepend
 @pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
 def test_smart_prepend(arg1, arg2, arg3):
     """test the insertion of a new string just past the time stamp

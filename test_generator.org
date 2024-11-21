@@ -104,17 +104,16 @@ python -m pytest -m "prepend"
   : t
 
   If the previous block was evaluated as .TRUE. (=t=), test script and
-  Makefile may be tangled right now by =C-c C-v t=.  After closing
-  this =.org= file, deploy them as indicated earlier.
+  =pytest.ini= may be tangled right now by =C-c C-v t=.  After closing
+  this =.org= file, deploy them as indicated.
 
 * Building the tests
 
 ** Building file =pytest.ini=
 
-   Markers file =pytest.ini= defines and which are used in file
-   =test_appendfilename.py= allows to constrain the run of
-   =pytest=.  Rather than to launch a check on all tests, a call
-   like e.g.,
+   File =pytest.ini= lists markers in file =test_appendfilename.py=
+   to optionally constrain =pytest= tests.  Rather than to launch
+   a check on all tests defined, a call like e.g.,
 
    #+begin_src bash  :tangle no
 python -m pytest -m "prepend"
@@ -123,27 +122,19 @@ python -m pytest -m "prepend"
    only checks those of set =prepend=.  At present, tests are
    grouped as
 
-   + =default= appendfilename's default string insertions
-   + =prepend= corresponding to either appendfilename's optional =-p=
-     or =--prepend= flag, and
-   + =smart= corresponding to appendfilename's optional
-    =--smart-prepend= flag
+   #+begin_src shell :tangle pytest.ini
+[pytest]
+markers =
+    default:        test appendfilename's default string insertion
+    prepend:        test appendfilename's optional -p/--prepend flag
+    smart_prepend:  test appendfilename's optional --smart-prepend flag
+   #+end_src
 
    It is possible to run one, two, or all three groups in one run of
    pytest, for instance
 
    #+begin_src bash :tangle no
 pytest-3 test_appendfilename.py -m "default and prepend" -v
-   #+end_src
-
-   The content of =pytest.ini=:
-
-   #+begin_src shell :tangle pytest.ini
-[pytest]
-markers =
-    default:  appendfilename's default string insertions
-    prepend:  appendfilename's optional -p/--prepend flag
-    smart:    appendfilename's optional --smart-prepend flag
    #+end_src
 
 ** Building the test script
@@ -398,7 +389,7 @@ arg3_values = [
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
 
 
-@pytest.mark.smart
+@pytest.mark.smart_prepend
 @pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
 def test_smart_prepend(arg1, arg2, arg3):
     """test the insertion of a new string just past the time stamp
