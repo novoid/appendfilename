@@ -1,8 +1,8 @@
 # name:    test_generator.org
 # author:  nbehrnd@yahoo.com
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-11-05 Tue]
-# license: GPL3, 2022.
+# edit:    [2024-11-21 Thu]
+# license: GPL3, 2022-2024
 # Export the tangled files with C-c C-v t
 
 #+PROPERTY: header-args :tangle yes
@@ -163,8 +163,8 @@ markers =
 
 Initially written for Python 3.9.9 and pytest 6.2.4 and recently update
 for Python 3.12.6/pytest 8.3.3, this script provides a programmatic check
-of functions offered by appendfilename.  Deposit this script in the root of
-the folder fetched and unzipped from PyPi or GitHub.  Create a virtual
+of functions offered by appendfilename.  Deposit this script in the root
+of the folder fetched and unzipped from PyPi or GitHub.  Create a virtual
 environment for Python, e.g. by
 
 ```shell
@@ -182,7 +182,7 @@ python -m pytest
 As a reminder, the following optional pytest flags may be useful to obtain
 a report tailored to your needs:
 
-- `-x` exits right after the first failing test (reported by `E` instead of `.`)
+- `-x` exit after the first failing test (reported by `E` instead of `.`)
 - `-v` provide a more verbose output
 - `-s` equally report the test criterion, e.g. the queried file name
 """
@@ -190,7 +190,6 @@ a report tailored to your needs:
 import re
 import os
 import shlex
-import sys
 import subprocess
 
 from itertools import product
@@ -206,9 +205,9 @@ PROGRAM = os.path.join("appendfilename", "__init__.py")  # Cross-platform path
     yield =test example.txt=.
 
     #+begin_src python :tangle test_appendfilename.py
-# The following section tests the applications default pattern where a string
-# is added to the file name, just prior to the file's file extension.  The
-# permutation of the three arguments and their levels defines 120 tests.
+# The following section tests the applications default pattern where a
+# string is added to the file name, just prior to the file's file
+# extension.  The permutations of the arguments define 120 tests.
 
 arg1_values = [
     "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
@@ -233,6 +232,7 @@ arg3_values = [
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
 
+
 @pytest.mark.default
 @pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
 def test_append(arg1, arg2, arg3):
@@ -249,7 +249,7 @@ def test_append(arg1, arg2, arg3):
     # run the test to be tested:
     full_command = ["python", PROGRAM, arg1
                     ] + shlex.split(arg2) + shlex.split(arg3)
-    subprocess.run(full_command, text = True, check = True)
+    subprocess.run(full_command, text=True, check=True)
 
     # construct the new file name to be tested:
     if len(shlex.split(arg3)) == 0:
@@ -258,9 +258,8 @@ def test_append(arg1, arg2, arg3):
         separator = shlex.split(arg3)[1]
 
     new_filename = "".join(
-        [ arg1[:-4], separator,
-          shlex.split(arg2)[1], ".txt" ])
-    print(f"test criterion: {new_filename}")  # visible by optional `pytest -s`
+        [arg1[:-4], separator, shlex.split(arg2)[1], ".txt"])
+    print(f"test criterion: {new_filename}")  # for an optional `pytest -s`
 
     # is the new file present?
     assert os.path.isfile(new_filename)
@@ -278,9 +277,10 @@ def test_append(arg1, arg2, arg3):
 
     #+begin_src python :tangle test_appendfilename.py
 
-# The following section is about tests to prepend a user defined string and
-# an adjustable separator to the original file name of the file submitted.  By
-# permutation of the parameter's levels, this defines 240 tests.
+# The following section is about tests to prepend a user defined string
+# and an adjustable separator to the original file name of the submitted
+# file.  The permutation of the parameters defines 240 tests.
+
 
 arg1_values = [
     "test.txt", "2021-12-31_test.txt", "2021-12-31T18.48.22_test.txt"
@@ -309,6 +309,7 @@ arg4_values = [
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values, arg4_values))
 
+
 @pytest.mark.prepend
 @pytest.mark.parametrize("arg1, arg2, arg3, arg4", test_cases)
 def test_prepend(arg1, arg2, arg3, arg4):
@@ -327,7 +328,7 @@ def test_prepend(arg1, arg2, arg3, arg4):
     full_command = [
         "python", PROGRAM, arg1
         ] + shlex.split(arg2) + shlex.split(arg3) + shlex.split(arg4)
-    subprocess.run(full_command, text = True, check = True)
+    subprocess.run(full_command, text=True, check=True)
 
     # construct the new file name to be tested:
     if len(shlex.split(arg3)) == 0:
@@ -335,7 +336,7 @@ def test_prepend(arg1, arg2, arg3, arg4):
     else:
         separator = shlex.split(arg3)[1]
 
-    new_filename = "".join( [ shlex.split(arg2)[1], separator, arg1 ] )
+    new_filename = "".join([shlex.split(arg2)[1], separator, arg1])
     print(f"test criterion: {new_filename}")  # visible by optional `pytest -s`
 
     # is the new file present?
@@ -363,12 +364,13 @@ def test_prepend(arg1, arg2, arg3, arg4):
 # This section tests the insertion of a string into the file's file name
 # just after the file's time or date stamp as provided `date2name`.
 
+
 arg1_values = [
     "2021-12-31T18.48.22_test.txt",
     "2021-12-31_test.txt",
-#    "20211231_test.txt",  # by now `20211231_test.txt` -> 20211231_test ping.txt
-#    "2021-12_test.txt",   # by now `2021-12_test.txt` -> `2021-12_test ping.txt`
-#    "211231_test.txt"     # by now `211231_test.txt` -> `211231_test ping.txt`
+    # "20211231_test.txt",  # by now `20211231_test.txt` -> 20211231_test ping.txt
+    # "2021-12_test.txt",   # by now `2021-12_test.txt` -> `2021-12_test ping.txt`
+    # "211231_test.txt"     # by now `211231_test.txt` -> `211231_test ping.txt`
 ]
 arg2_values = [
     "-t book",
@@ -378,15 +380,15 @@ arg2_values = [
 ]
 arg3_values = [
     "",  # i.e. fall back to default single space
-#    "--separator '!'",
-#    "--separator '@'",
-#    "--separator '#'",
-#    "--separator '$'",
-#    "--separator '%'",
-#    "--separator '_'",
-#    "--separator '+'",
-#    "--separator '='",
-#    "--separator '-'"
+    # "--separator '!'",
+    # "--separator '@'",
+    # "--separator '#'",
+    # "--separator '$'",
+    # "--separator '%'",
+    # "--separator '_'",
+    # "--separator '+'",
+    # "--separator '='",
+    # "--separator '-'"
 ]
 # Note: The check with pytest and `*` as separator in Windows 10 fails.
 # Contrasting to Linux Debian 13, a `pytest` in Windows 10 revealed every
@@ -394,6 +396,7 @@ arg3_values = [
 
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
+
 
 @pytest.mark.smart
 @pytest.mark.parametrize("arg1, arg2, arg3", test_cases)
@@ -405,17 +408,17 @@ def test_smart_prepend(arg1, arg2, arg3):
     arg3   the separator (at least in Windows 10, do not use `*`
     """
     time_stamp = ""
-    time_stamp_separator = ""
+    # time_stamp_separator = ""
     old_filename_no_timestamp = ""
 
     # create a test file:
     with open(arg1, mode="w", encoding="utf-8") as newfile:
         newfile.write("this is a placeholder\n")
 
-    #run `appendfilename` on this test file
+    # run `appendfilename` on this test file
     run_appendfilename = " ".join(
         ["python", PROGRAM, arg1, arg2, arg3, " --smart-prepend"])
-    subprocess.run(run_appendfilename, shell=True, check = True)
+    subprocess.run(run_appendfilename, shell=True, check=True)
 
     # construct the new file name to be testedt:
     old_filename = arg1
@@ -472,9 +475,9 @@ def test_smart_prepend(arg1, arg2, arg3):
         time_stamp_separator = old_filename[6]
         old_filename_no_timestamp = old_filename[7:]
 
-    new_filename = "".join([time_stamp, #time_stamp_separator,
+    new_filename = "".join([time_stamp,  # time_stamp_separator,
         separator, shlex.split(arg2)[1], separator,
-        old_filename_no_timestamp ])
+        old_filename_no_timestamp])
 
     # is the new file present?
     print("\nnew_filename")  # optional check for `pytest -s`
