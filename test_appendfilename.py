@@ -4,7 +4,7 @@
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-11-05 Tue]
+# edit:    [2024-11-21 Thu]
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -18,9 +18,9 @@ environment for Python, e.g. by
 python -m venv sup
 ```
 
-In the activated virtual environment, ensure the dependencies are met -
-either by `pip install pyreadline3 pytest`, or `pip install -r requirements.txt`
-- and launch the tests by
+In the activated virtual environment, resolve the dependencies - either by
+`pip install pyreadline3 pytest`, or `pip install -r requirements.txt` -
+and launch the tests by
 
 ```shell
 python -m pytest
@@ -32,6 +32,12 @@ a report tailored to your needs:
 - `-x` exit after the first failing test (reported by `E` instead of `.`)
 - `-v` provide a more verbose output
 - `-s` equally report the test criterion, e.g. the queried file name
+
+Equally keep in mind you can constrain pytest tests.  Labels assigned are
+
+- default:        test appendfilename's default string insertion
+- prepend:        test appendfilename's optional -p/--prepend flag
+- smart_prepend:  test appendfilename's optional --smart-prepend flag
 """
 
 import re
@@ -43,7 +49,7 @@ from itertools import product
 
 import pytest
 
-PROGRAM = os.path.join("appendfilename", "__init__.py")  # Cross-platform path
+PROGRAM = os.path.join("appendfilename", "__init__.py")
 
 # The following section tests the applications default pattern where a
 # string is added to the file name, just prior to the file's file
@@ -67,7 +73,9 @@ arg3_values = [
     "--separator '='",
     "--separator '-'"
 ]
-# Note: The check with pytest and `*` as separator in Windows 10 fails.
+# Note: In Windows 10, the check with pytest and `*` as separator fails
+# because it is not a permitted character in a file name there.  See
+# <https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file>
 
 # create the permutations:
 test_cases = list(product(arg1_values, arg2_values, arg3_values))
