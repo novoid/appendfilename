@@ -4,7 +4,7 @@
 # author:  nbehrnd@yahoo.com
 # license: GPL v3, 2022.
 # date:    2022-01-05 (YYYY-MM-DD)
-# edit:    [2024-11-21 Thu]
+# edit:    [2024-11-22 Fri]
 #
 """Test pad for functions by appendfilename with pytest.
 
@@ -231,8 +231,8 @@ def test_smart_prepend(arg1, arg2, arg3):
     arg2   the text string to be added
     arg3   the separator (at least in Windows 10, do not use `*`
     """
-    time_stamp = ""
-    # time_stamp_separator = ""
+    timestamp = ""
+    # timestamp_separator = ""
     old_filename_no_timestamp = ""
 
     # create a test file:
@@ -253,7 +253,7 @@ def test_smart_prepend(arg1, arg2, arg3):
     else:
         separator = shlex.split(arg3)[1]
 
-    # Time stamps `date2name` provides can be either one of five formats
+    # Timestamps `date2name` provides can be either one of five formats
     #
     # YYYY-MM-DDTHH.MM.SS   `--withtime`
     # YYYY-MM-DD            default
@@ -269,42 +269,39 @@ def test_smart_prepend(arg1, arg2, arg3):
     # https://github.com/novoid/appendfilename/issues/15
     # https://github.com/novoid/appendfilename/issues/16
 
-    # pattern `--with-time`
-    if re.search(r"^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d", old_filename):
-        time_stamp = old_filename[:19]
-        time_stamp_separator = old_filename[19]
-        old_filename_no_timestamp = old_filename[20:]
+    patterns = [
+        r"^\d{4}-[012]\d-[0-3]\dT[012]\d\.[0-5]\d\.[0-5]\d",
+        r"^\d{4}-[012]\d-[0-3]\d",
+        r"^\d{4}[012]\d[0-3]\d",
+        r"^\d{4}-[012]\d",
+        r"^\d{2}[012]\d[0-3]\d"
+    ]
 
-    # default pattern
-    elif re.search(r"^\d{4}-[012]\d-[0-3]\d", old_filename):
-        time_stamp = old_filename[:10]
-        time_stamp_separator = old_filename[10]
-        old_filename_no_timestamp = old_filename[11:]
+    for pattern in patterns:
+        match = re.search(pattern, old_filename)
+        if match:
+            timestamp = re.findall(pattern, old_filename)[0]
+            timestamp_separator = str(old_filename)[len(timestamp)]
+            old_filename_no_timestamp = old_filename[len(timestamp) + 1:]
 
-    # pattern `--compact`  # currently fails
-    elif re.search(r"^\d{4}[012]\d[0-3]\d", old_filename):
-        time_stamp = old_filename[:8]
-        time_stamp_separator = old_filename[8]
-        old_filename_no_timestamp = old_filename[9:]
+            print("\n\ntest of option smart-prepend:")  # `pytest -s` diagnosis
+            print("old_filename:")
+            print(old_filename)
+            print("timestamp, timestamp_separator, old_filename_no_timestamp")
+            print(timestamp)
+            print(timestamp_separator)
+            print(old_filename_no_timestamp)
 
-    # pattern `--month`  # currently fails
-    elif re.search(r"^\d{4}-[012]\d", old_filename):
-        time_stamp = old_filename[:7]
-        time_stamp_separator = old_filename[7]
-        old_filename_no_timestamp = old_filename[8:]
+            break
 
-    # pattern `--short`  # currently fails
-    elif re.search(r"^\d{4}[012]\d[0-3]\d", old_filename):
-        time_stamp = old_filename[:6]
-        time_stamp_separator = old_filename[6]
-        old_filename_no_timestamp = old_filename[7:]
-
-    new_filename = "".join([time_stamp,  # time_stamp_separator,
+    new_filename = "".join([
+        timestamp,  # timestamp_separator,
         separator, shlex.split(arg2)[1], separator,
-        old_filename_no_timestamp])
+        old_filename_no_timestamp
+    ])
 
     # is the new file present?
-    print("\nnew_filename")  # optional check for `pytest -s`
+    print("new_filename")  # optional check for `pytest -s`
     print(new_filename)
     assert os.path.isfile(new_filename)
 

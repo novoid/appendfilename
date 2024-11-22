@@ -3,7 +3,7 @@ name: CI_pytest_appendfilename
 # name    : pytest.yml
 # purpose : regularly run pytest on appendfilename
 # date    : [2024-10-31 Thu]
-# edit    : [2024-11-12 Tue]
+# edit    : [2024-11-22 Fri]
 
 on:
   push:
@@ -43,7 +43,10 @@ jobs:
 
       - name: run the check by pytest
         run: |
+          echo "default"
           python -m pytest -m "default"
+          echo "prepend"
           python -m pytest -m "prepend"
-          python -m pytest -m "smart"
+          echo "smart_prepend"
+          python -m pytest -m "smart_prepend"
 
