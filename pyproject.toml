@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "appendfilename"
+version = "2025.5.7"
+description = "Intelligent appending text to file names, considering file extensions and file tags"
+# readme = "README.org"
+readme = {file = "README.org", content-type = "text/orgmode"}
+requires-python = ">=3.9"
+license = {file = "license.txt"}
+authors = [
+    {name="Karl Voit", email="tools@Karl-Voit.at"},
+]
+keywords = [
+    "file managing",
+    "file management",
+    "files",
+    "name",
+    "time",
+    "time-stamps",
+]
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pyreadline3"
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/novoid/appendfilename"
+Repository = "https://github.com/novoid/appendfilename"
+Issues = "https://github.com/novoid/appendfilename/issues"
+
+[project.scripts]
+appendfilename = "appendfilename:main"
+
+[tools.setuptools.packages.find]
+where = ["."]
+
