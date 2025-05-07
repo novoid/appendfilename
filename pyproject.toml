@@ -7,7 +7,7 @@ name = "appendfilename"
 version = "2025.5.7"
 description = "Intelligent appending text to file names, considering file extensions and file tags"
 # readme = "README.org"
-readme = {file = "README.org", content-type = "text/orgmode"}
+readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "license.txt"}
 authors = [
