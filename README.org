@@ -1,3 +1,6 @@
+#+OPTIONS: TOC:nil
+#+OPTIONS: ^:nil
+
 * appendfilename.py
 
 #+BEGIN_HTML
@@ -132,7 +135,17 @@ Options:
 
 ** Installation
 
-Get it from [[https://github.com/novoid/appendfilename][GitHub]] or install it via =pip install appendfilename=
+Get it from [[https://pypi.org/project/appendfilename/\\][PyPI]] by the command ~pip install appendfilename~.  If you
+clone or fetch it from [[https://github.com/novoid/appendfilename][GitHub]], enter the folder of your copy and
+resolve the dependencies defined in ~pyproject.toml~ by either
+
+#+begin_src sh
+  pip install .
+  pip install .[dev]
+#+end_src
+
+for use, or development.  In the later case, don't forget the
+optional ~-e~ flag to render the installation editable.
 
 ** Smart Prepend
 

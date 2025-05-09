@@ -3,15 +3,16 @@ name: CI_pytest_appendfilename
 # name    : pytest.yml
 # purpose : regularly run pytest on appendfilename
 # date    : [2024-10-31 Thu]
-# edit    : [2024-11-22 Fri]
+# edit    : [2025-05-07 Wed]
 
 on:
   push:
     branches:
-      - master           # additions to the principal branch "master"
+      - master
+      - dev
   pull_request:
     branches:
-      - master           # PRs to enter the principal branch "master"
+      - master
   workflow_dispatch:     # provide a manual trigger
   # schedule:
     # - cron: "0 0 1 * *"  # once each 1st of a month, at 00:00 UTC (cf. https://crontab.guru/)
@@ -22,9 +23,9 @@ jobs:
       matrix:
         # for a factorial test, an explicit selection of GitHUb runner images
         # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
-        # state of commit 23478d3 as visited on 2024-11-11 Mon
-        os: [ubuntu-20.04, ubuntu-22.04,ubuntu-24.04, windows-2019, windows-2022, macos-14]
-        python-version: ["3.10", "3.12"]
+        # state of commit 23478d3 as visited on 2025-05-07 Wed
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        python-version: ["3.9", "3.13"]
     runs-on: ${{ matrix.os }}
 
     timeout-minutes: 5  # Timeout for each job individually
@@ -39,7 +40,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies with PyPI
-        run: pip install -r requirements.txt
+        run: pip install .[dev]
 
       - name: run the check by pytest
         run: |
