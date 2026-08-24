@@ -4,7 +4,7 @@ requires-python = ">=3.10"
 
 [[package]]
 name = "appendfilename"
-version = "2026.5.24.1"
+version = "2026.6.6.1"
 source = { editable = "." }
 dependencies = [
     { name = "pyreadline3" },
